@@ -18,3 +18,12 @@ module.exports = {
     "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
   },
 };
+{
+  "printWidth": 200,
+    "tabWidth": 2,
+      "useTabs": true,
+        "semi": false,
+          "singleQuote": true,
+            "bracketSpacing": true,
+              "arrowParens": "avoid"
+}
