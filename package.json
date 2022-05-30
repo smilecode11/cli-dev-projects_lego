@@ -9,6 +9,8 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^6.1.0",
+    "ant-design-vue": "^3.2.5",
     "axios": "^0.27.2",
     "core-js": "^3.8.3",
     "mrm": "2",
@@ -38,7 +40,6 @@
     "typescript": "~4.5.5"
   },
   "lint-staged": {
-    "*.{js,css,md,ts,tsx}": "prettier --write",
-    "*.js": "eslint --cache --fix"
+    "*.{js,css,md,ts,tsx}": "prettier --write"
   }
 }
