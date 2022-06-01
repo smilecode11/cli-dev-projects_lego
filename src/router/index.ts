@@ -29,6 +29,7 @@ const routes: Array<RouteRecordRaw> = [
     name: "editor",
     meta: {
       withoutFooter: true,
+      withoutHeader: true,
     },
     component: () => import("../views/editor/index.vue"),
   },

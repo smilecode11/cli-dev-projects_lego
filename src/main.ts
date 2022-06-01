@@ -16,10 +16,14 @@ import {
   Button,
   Card,
   Tag,
+  Form,
   Input,
+  InputNumber,
   Dropdown,
   Menu,
-  Form,
+  Slider,
+  Radio,
+  Select,
 } from "ant-design-vue";
 
 const app = createApp(App);
@@ -31,8 +35,12 @@ app
   .use(Button)
   .use(Card)
   .use(Input)
+  .use(InputNumber)
+  .use(Slider)
   .use(Dropdown)
   .use(Menu)
+  .use(Radio)
+  .use(Select)
   .use(Form);
 
 app.use(store).use(router).mount("#app");
