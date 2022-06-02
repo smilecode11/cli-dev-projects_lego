@@ -1,3 +1,4 @@
+import { h, VNode } from "vue";
 import { TextComponentProps } from "@/defaultProps";
 
 export interface PropToForm {
@@ -5,7 +6,7 @@ export interface PropToForm {
   extraProps?: { [key: string]: any }; //  额外的其他属性
   text?: string; //  label 文案
   subComponent?: string; //  子组件
-  options?: { text: string; value: any }[]; //  子组件渲染和展示文本
+  options?: { text: string | VNode; value: any }[]; //  子组件渲染和展示文本
   initalTransform?: (v: any) => any; //  转化函数 - 传参处理
   afterTransform?: (v: any) => any; //  转换函数  - 输出结果
   valueProp?: string; //  接收值的 key 名, 默认 value
@@ -15,6 +16,20 @@ export interface PropToForm {
 export type PropsToForms = {
   [P in keyof TextComponentProps]?: PropToForm;
 };
+
+const fontFamilyArray = [
+  { value: "'SimSun','STSong'", text: "宋体" },
+  { value: "'SimHei','STHei'", text: "黑体" },
+  { value: "'KaiTi','STKaiti'", text: "楷体" },
+  { value: "'FangSong','STFangsong'", text: "仿宋" },
+];
+
+const fontFamilyOptions = fontFamilyArray.map((font) => {
+  return {
+    value: font.value,
+    text: h("span", { style: { fontFamily: font.value } }, font.text),
+  };
+});
 
 export const mapPropsToForms: PropsToForms = {
   text: {
@@ -51,12 +66,6 @@ export const mapPropsToForms: PropsToForms = {
     component: "a-select",
     subComponent: "a-select-option",
     text: "字体",
-    options: [
-      { value: "", text: "无" },
-      { value: "'SimSun','STSong'", text: "宋体" },
-      { value: "'SimHei','STHei'", text: "黑体" },
-      { value: "'KaiTi','STKaiti'", text: "楷体" },
-      { value: "'FangSong','STFangsong'", text: "仿宋" },
-    ],
+    options: [{ value: "", text: "无" }, ...fontFamilyOptions],
   },
 };

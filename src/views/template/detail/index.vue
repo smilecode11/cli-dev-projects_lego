@@ -3,6 +3,7 @@
     <h1>This is an template detail page</h1>
     <div>{{ template.id }} - {{ template.title }} - {{ template.author }}</div>
     <a-button @click="goEditor">编辑</a-button>
+    <Hello msg="hello" />
   </div>
 </template>
 
@@ -13,6 +14,8 @@ import { useRoute, useRouter } from "vue-router";
 
 import { GlobalDataProps } from "@/store";
 import { TemplateProps } from "@/store/modules/templates";
+
+import Hello from "@/components/Hello";
 
 export default defineComponent({
   name: "TemplateDetailPage",
@@ -33,6 +36,9 @@ export default defineComponent({
       template,
       goEditor,
     };
+  },
+  components: {
+    Hello,
   },
 });
 </script>

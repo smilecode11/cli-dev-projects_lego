@@ -15,8 +15,9 @@
             v-for="(option, k) in value.options"
             :key="k"
             :value="option.value"
-            >{{ option.text }}</component
           >
+            <render-vnode :v-node="option.text"></render-vnode>
+          </component>
         </template>
       </component>
     </div>
@@ -24,10 +25,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, PropType } from "vue";
+import { defineComponent, computed, PropType, VNode } from "vue";
 import { reduce } from "lodash-es";
 import { TextComponentProps } from "@/defaultProps";
 import { mapPropsToForms } from "@/propsMap";
+
+import RenderVnode from "@/components/RenderVnode";
 
 //  表单渲染的数据结构
 interface FormProps {
@@ -36,7 +39,7 @@ interface FormProps {
   value: string;
   extraProps?: { [key: string]: any };
   text?: string;
-  options?: { text: string; value: any }[];
+  options?: { text: string | VNode; value: any }[];
   valueProp: string;
   eventName: string;
   events: { [key: string]: (e: any) => void };
@@ -90,12 +93,14 @@ export default defineComponent({
 
     return { finallyProps };
   },
+  components: {
+    RenderVnode,
+  },
 });
 </script>
 
 <style scoped>
 .props-table {
-  /* display: flex; */
   padding: 12px 18px;
 }
 .prop-item {
@@ -106,7 +111,6 @@ export default defineComponent({
 
 .prop-item .label {
   flex: 0 0 60px;
-  /* text-align: center; */
 }
 
 .prop-item .component-control {
