@@ -4,11 +4,15 @@
     <div>{{ template.id }} - {{ template.title }} - {{ template.author }}</div>
     <a-button @click="goEditor">编辑</a-button>
     <Hello msg="hello" />
+    <PickerColor @change="handlePickerChange" :value="pickColor" />
+    <UploadTest />
+    <hr />
+    <UploadFileVue />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
+import { defineComponent, computed, ref } from "vue";
 import { useStore } from "vuex";
 import { useRoute, useRouter } from "vue-router";
 
@@ -16,6 +20,9 @@ import { GlobalDataProps } from "@/store";
 import { TemplateProps } from "@/store/modules/templates";
 
 import Hello from "@/components/Hello";
+import PickerColor from "@/components/PickerColor.vue";
+import UploadTest from "@/components/UploadTest.vue";
+import UploadFileVue from "@/components/UploadFile.vue";
 
 export default defineComponent({
   name: "TemplateDetailPage",
@@ -32,13 +39,23 @@ export default defineComponent({
       router.push(`/editor/${currentId}`);
     };
 
+    const pickColor = ref<undefined | string>(undefined);
+    const handlePickerChange = (color: string) => {
+      pickColor.value = color;
+    };
+
     return {
       template,
+      pickColor,
+      handlePickerChange,
       goEditor,
     };
   },
   components: {
     Hello,
+    PickerColor,
+    UploadTest,
+    UploadFileVue,
   },
 });
 </script>

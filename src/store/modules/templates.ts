@@ -16,7 +16,7 @@ export interface TemplatesProps {
 }
 
 //  测试数据
-const testData: TemplateProps[] = [
+export const testData: TemplateProps[] = [
   { id: 1, title: "title1", coverImg: "", author: "", copiedCount: 0 },
   { id: 2, title: "title2", coverImg: "", author: "", copiedCount: 0 },
   { id: 3, title: "title3", coverImg: "", author: "", copiedCount: 0 },

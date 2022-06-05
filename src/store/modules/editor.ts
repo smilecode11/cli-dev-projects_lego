@@ -1,4 +1,4 @@
-import { TextComponentProps } from "@/defaultProps";
+import { TextComponentProps, textDefaultProps } from "@/defaultProps";
 import { v4 as uuidv4 } from "uuid";
 import { Module } from "vuex";
 import { GlobalDataProps } from "../index";
@@ -12,7 +12,8 @@ export interface EditorProps {
 
 export interface ComponentProps {
   //    元素属性
-  props: { [key: string]: unknown };
+  //   props: { [key: string]: unknown };
+  props: { [key in keyof TextComponentProps]?: TextComponentProps[key] };
   //    元素 id: uuidv4 生成
   id: string;
   //    元素名称, 如 l-text, l-image 等
@@ -24,10 +25,11 @@ export const testComponents: ComponentProps[] = [
   {
     id: uuidv4(),
     props: {
+      ...textDefaultProps,
       text: "hello",
       fontFamily: "'SimSun','STSong'",
       fontSize: "25px",
-      color: "deeppink",
+      color: "#333333",
       lineHeight: "1",
       textAlign: "right",
     },
@@ -36,6 +38,7 @@ export const testComponents: ComponentProps[] = [
   {
     id: uuidv4(),
     props: {
+      ...textDefaultProps,
       text: "hello2",
       fontFamily: "'KaiTi','STKaiti'",
       fontSize: "15px",
@@ -48,6 +51,7 @@ export const testComponents: ComponentProps[] = [
   {
     id: uuidv4(),
     props: {
+      ...textDefaultProps,
       text: "hello3",
       fontFamily: "'SimHei','STHei'",
       fontSize: "10px",
@@ -74,7 +78,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       state.components.push({
         id: uuidv4(),
         name: "l-text",
-        props,
+        props: { ...textDefaultProps, ...props },
       });
     },
     setActive: (state, id) => {
@@ -85,7 +89,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         (component) => component.id === state.currentElement
       );
       if (updateComponent) {
-        updateComponent.props[key] = value;
+        updateComponent.props[key as keyof TextComponentProps] = value;
       }
     },
   },

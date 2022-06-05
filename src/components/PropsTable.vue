@@ -31,6 +31,7 @@ import { TextComponentProps } from "@/defaultProps";
 import { mapPropsToForms } from "@/propsMap";
 
 import RenderVnode from "@/components/RenderVnode";
+import PickerColor from "@/components/PickerColor.vue";
 
 //  表单渲染的数据结构
 interface FormProps {
@@ -95,6 +96,7 @@ export default defineComponent({
   },
   components: {
     RenderVnode,
+    PickerColor,
   },
 });
 </script>
