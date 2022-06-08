@@ -28,8 +28,6 @@ export default defineComponent({
       imageStylePropNames
     );
 
-    console.log(styleProps);
-
     return {
       styleProps,
       handleClick,
