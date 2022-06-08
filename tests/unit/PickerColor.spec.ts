@@ -1,4 +1,4 @@
-import { mount, VueWrapper } from "@vue/test-utils";
+import { shallowMount, VueWrapper } from "@vue/test-utils";
 import PickerColor from "@/components/PickerColor.vue";
 import rgbHex from "rgb-hex";
 
@@ -18,7 +18,7 @@ const defaultColors = [
 let wrapper: VueWrapper<any>;
 describe(`PickerColor 组件测试`, () => {
   beforeAll(() => {
-    wrapper = mount(PickerColor, {
+    wrapper = shallowMount(PickerColor, {
       props: {
         value: "#ffffff",
       },
@@ -26,19 +26,6 @@ describe(`PickerColor 组件测试`, () => {
   });
 
   it(`组件基础布局和样式`, () => {
-    //   <div class="picker-color-component">
-    //     <input type="color" :value="value" @input="change" />
-    //     <ul class="color-list">
-    //       <li class="color-item">
-    //          <div style="background-color:#ffffff"></div>
-    //       </li>
-    //        ...
-    //       <li class="color-item">
-    //          <div style="background-color:#ffffff" class="transparent-back"></div>
-    //       </li>
-    //     </ul>
-    //   </div>
-
     //  检测左侧是否为 input, 类型和值是否正确
     expect(wrapper.find("input").exists()).toBeTruthy();
     const inputEle = wrapper.get("input").element;

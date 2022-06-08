@@ -2,7 +2,7 @@
   <component
     :is="tag"
     :style="styleProps"
-    @click="handleClick"
+    @click.prevent="handleClick"
     class="l-text-component"
   >
     {{ text }}

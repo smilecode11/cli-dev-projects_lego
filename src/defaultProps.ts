@@ -4,7 +4,7 @@ export interface CommonDefaultProps {
   actionType: string;
   url: string;
   height: string;
-  width: string;
+  width: string | number;
   paddingLeft: string;
   paddingRight: string;
   paddingTop: string;
@@ -14,7 +14,7 @@ export interface CommonDefaultProps {
   borderWith: string;
   borderRadius: string;
   boxShadow: string;
-  opacity: number;
+  opacity: number | string;
   position: string;
   left: string;
   right: string;
@@ -22,6 +22,25 @@ export interface CommonDefaultProps {
   bottom: string;
   cursor: string;
 }
+
+export interface TextComponentProps extends CommonDefaultProps {
+  text: string;
+  fontSize: string;
+  fontFamily: string;
+  fontWeight: string;
+  fontStyle: string;
+  textDecoration: string;
+  lineHeight: string;
+  textAlign: string;
+  color: string;
+  backgroundColor: string;
+}
+
+export interface ImageDefaultProps extends CommonDefaultProps {
+  src: string;
+}
+
+export type AllComponentProps = TextComponentProps & ImageDefaultProps;
 
 /** 通用属性*/
 export const commonDefaultProps: CommonDefaultProps = {
@@ -52,19 +71,6 @@ export const commonDefaultProps: CommonDefaultProps = {
   cursor: "normal",
 };
 
-export interface TextComponentProps extends CommonDefaultProps {
-  text: string;
-  fontSize: string;
-  fontFamily: string;
-  fontWeight: string;
-  fontStyle: string;
-  textDecoration: string;
-  lineHeight: string;
-  textAlign: string;
-  color: string;
-  backgroundColor: string;
-}
-
 /** 文本属性*/
 export const textDefaultProps: TextComponentProps = {
   text: "正文内容",
@@ -77,6 +83,11 @@ export const textDefaultProps: TextComponentProps = {
   textAlign: "left",
   color: "#000000",
   backgroundColor: "",
+  ...commonDefaultProps,
+};
+
+export const imageDefaultProps: ImageDefaultProps = {
+  src: "test.url",
   ...commonDefaultProps,
 };
 
@@ -97,4 +108,10 @@ export const testStylePropNames = without(
   "actionType",
   "url",
   "text"
+);
+
+/** 图片样式属性名集合*/
+export const imageStylePropNames = without(
+  Object.keys(imageDefaultProps),
+  "src"
 );

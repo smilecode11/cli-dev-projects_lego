@@ -1,4 +1,8 @@
-import { TextComponentProps, textDefaultProps } from "@/defaultProps";
+import {
+  TextComponentProps,
+  textDefaultProps,
+  AllComponentProps,
+} from "@/defaultProps";
 import { v4 as uuidv4 } from "uuid";
 import { Module } from "vuex";
 import { GlobalDataProps } from "../index";
@@ -13,7 +17,7 @@ export interface EditorProps {
 export interface ComponentProps {
   //    元素属性
   //   props: { [key: string]: unknown };
-  props: { [key in keyof TextComponentProps]?: TextComponentProps[key] };
+  props: { [key in keyof AllComponentProps]?: AllComponentProps[key] };
   //    元素 id: uuidv4 生成
   id: string;
   //    元素名称, 如 l-text, l-image 等
@@ -74,12 +78,8 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     currentElement: "",
   },
   mutations: {
-    addComponent: (state, props: Partial<TextComponentProps>) => {
-      state.components.push({
-        id: uuidv4(),
-        name: "l-text",
-        props: { ...textDefaultProps, ...props },
-      });
+    addComponent: (state, component: ComponentProps) => {
+      state.components.push(component);
     },
     setActive: (state, id) => {
       state.currentElement = id;

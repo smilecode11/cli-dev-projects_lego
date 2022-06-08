@@ -2,7 +2,6 @@
   <div class="editor-page">
     <a-row class="container">
       <a-col :span="6" class="templates-wrap">
-        <!-- 左侧模板 -->
         <components-list
           :list="defaultTextTemplates"
           @onItemClick="handleItemClick"
@@ -46,6 +45,7 @@ import { ComponentProps } from "@/store/modules/editor";
 import { defaultTextTemplates } from "@/defaultTemplates";
 
 import LText from "@/components/LText.vue";
+import LImage from "@/components/LImage.vue";
 import ComponentsList from "@/components/ComponentsList.vue";
 import EditWrapper from "@/components/EditWrapper.vue";
 import PropsTable from "@/components/PropsTable.vue";
@@ -56,8 +56,8 @@ export default defineComponent({
     const store = useStore<GlobalDataProps>();
     const components = computed(() => store.state.editor.components);
 
-    const handleItemClick = (props: any) => {
-      store.commit("editor/addComponent", props);
+    const handleItemClick = (component: any) => {
+      store.commit("editor/addComponent", component);
     };
 
     const setActive = (id: string) => {
@@ -85,6 +85,7 @@ export default defineComponent({
   },
   components: {
     LText,
+    LImage,
     ComponentsList,
     EditWrapper,
     PropsTable,
@@ -102,8 +103,14 @@ export default defineComponent({
 }
 
 .container .templates-wrap {
+  height: 100%;
   background: antiquewhite;
 }
+
+.templates-wrap .components-wrap {
+  height: 100%;
+}
+
 .container .editor-wrap {
   padding: 120px 60px 0;
   background: plum;

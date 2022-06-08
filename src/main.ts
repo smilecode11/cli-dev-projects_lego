@@ -24,6 +24,7 @@ import {
   Slider,
   Radio,
   Select,
+  Progress,
 } from "ant-design-vue";
 
 const app = createApp(App);
@@ -41,6 +42,9 @@ app
   .use(Menu)
   .use(Radio)
   .use(Select)
+  .use(Progress)
   .use(Form);
 
-app.use(store).use(router).mount("#app");
+app.use(store).use(router); //  use 返回 app instance
+
+app.mount("#app"); //  mount 返回 component instance
