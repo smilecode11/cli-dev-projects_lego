@@ -50,8 +50,9 @@ export default defineComponent({
 
     //  登录操作
     const login = () => {
-      store.commit("login");
-      message.success("登录成功", 2);
+      router.push("/login");
+      // store.commit("login");
+      // message.success("登录成功", 2);
     };
 
     //  登出操作

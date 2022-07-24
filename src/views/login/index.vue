@@ -45,6 +45,10 @@
               {{ counter === 60 ? "获取验证码" : `${counter}秒后重发` }}
             </a-button>
           </a-form-item>
+          <div class="auth-wrap">
+            <a-button @click="handleOAthLogin">gitee 授权登录</a-button>
+            <a-button @click="handleTest">测试 OPTION</a-button>
+          </div>
         </a-form>
       </a-col>
     </a-row>
@@ -52,7 +56,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, computed /* , watch */ } from "vue";
+import { defineComponent, reactive, ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { UserOutlined, LockOutlined } from "@ant-design/icons-vue";
@@ -60,6 +64,7 @@ import { Rule } from "ant-design-vue/lib/form/interface";
 
 import { GlobalDataProps } from "@/store";
 import { message } from "ant-design-vue";
+import axios from "axios";
 export default defineComponent({
   name: "LoginPage",
   setup() {
@@ -110,6 +115,61 @@ export default defineComponent({
       router.push("/");
     };
 
+    onMounted(() => {
+      window.addEventListener("message", (m) => {
+        const { type, token } = m.data;
+        if (type === "oauth-token") {
+          axios
+            .get("http://127.0.0.1:7001/api/users/getUserInfo", {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((resp) => {
+              const data = resp.data.data;
+              store.dispatch("login", {
+                nickName: data.nickName,
+                avatar: data.picture,
+              });
+              message.success(
+                `欢迎${store.state.user.data?.nickName}, 登录成功!`
+              );
+              setTimeout(() => {
+                router.push("/");
+              }, 2000);
+            });
+        }
+      });
+    });
+
+    const handleTest = () => {
+      axios
+        .post(
+          `http://127.0.0.1:7001/api/users/loginByEmail`,
+          {
+            username: "18958849752@163.com",
+            password: "woaiwo1234",
+          },
+          {
+            headers: {
+              "Custom-Param": "test",
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          }
+        )
+        .then((resp) => {
+          console.log("resp", resp);
+        });
+    };
+
+    const handleOAthLogin = () => {
+      window.open(
+        `http://127.0.0.1:7001/api/users/passport/gitee`,
+        "_blank",
+        "height=500,width=500,left=0;top=0"
+      );
+    };
+
     return {
       form,
       rules,
@@ -118,6 +178,8 @@ export default defineComponent({
       codeButtonDisable,
       getCode,
       counter,
+      handleOAthLogin,
+      handleTest,
     };
   },
   components: {
