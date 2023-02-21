@@ -92,7 +92,7 @@ export default defineComponent({
   props: {
     action: {
       type: String,
-      default: "/api/lego/upload",
+      default: "",
     },
     autoUpload: {
       type: Boolean,
@@ -153,6 +153,8 @@ export default defineComponent({
 
     //  上传逻辑
     const postFile = (readyFile: UploadFile) => {
+      console.log("_postFile");
+      console.log("action", props.action);
       const formData = new FormData();
       formData.append(readyFile.name, readyFile.raw);
       readyFile.status = "loading"; //  初始文件状态
@@ -161,6 +163,7 @@ export default defineComponent({
         .post(`${props.action}`, formData, {
           headers: {
             "Content-Type": "mutipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           onUploadProgress: (progressEvent) => {
             const { total, loaded } = progressEvent;
@@ -173,6 +176,7 @@ export default defineComponent({
           timeout: 10000,
         })
         .then((resp) => {
+          console.log("__postFile success", resp);
           setTimeout(() => {
             readyFile.status = "success";
             readyFile.process = 100;
@@ -181,7 +185,10 @@ export default defineComponent({
             }
           }, 700);
           readyFile.resp = resp.data;
-          context.emit("success", { resp: resp.data, file: readyFile.raw });
+          context.emit("success", {
+            resp: resp.data,
+            file: readyFile.raw,
+          });
         })
         .catch((error) => {
           setTimeout(() => {
@@ -207,6 +214,9 @@ export default defineComponent({
         status: "ready",
         raw: file,
       });
+      console.log("_addFileToList", file);
+      console.log("_props.listType", props.listType);
+
       if (props.listType === "picture") {
         try {
           fileObj.url = URL.createObjectURL(file);

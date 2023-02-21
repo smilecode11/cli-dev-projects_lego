@@ -72,4 +72,8 @@ export const mapPropsToForms: PropsToForms = {
     text: "字色",
     component: "picker-color",
   },
+  // imageComponentProps
+  // src: {
+  //   component: 'image-processer'
+  // },
 };

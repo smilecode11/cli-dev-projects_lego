@@ -59,4 +59,18 @@ const router = createRouter({
   routes,
 });
 
+export const writeRouterFullPath = ["/login", "/home"];
+
+router.beforeEach((to, from, next) => {
+  console.log("_router beforeEach", to, from);
+  //  TODO: 排除白名单, 其他路由需要验证登录
+  if (writeRouterFullPath.includes(to.fullPath)) {
+    next();
+  } else {
+    //  验证登录态
+    console.log("TODO: 验证登录态");
+    next();
+  }
+});
+
 export default router;

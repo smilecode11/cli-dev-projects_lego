@@ -1,6 +1,7 @@
 <template>
   <div class="component-container">
     <div class="image-component">
+      上传组件在这里<br />
       <StyledUpload @success="onImageUploaded" />
     </div>
     <div class="text-component">
@@ -21,11 +22,16 @@ import { defineComponent, PropType } from "vue";
 import StyledUpload from "@/components/StyledUpload.vue";
 import LText from "@/components/LText.vue";
 import { v4 as uuidV4 } from "uuid";
+// import {
+//   imageDefaultProps,
+//   TextComponentProps,
+//   textDefaultProps,
+// } from "@/defaultProps";
 import {
   imageDefaultProps,
   TextComponentProps,
   textDefaultProps,
-} from "@/defaultProps";
+} from "lego-bricks";
 import { ComponentProps } from "@/store/modules/editor";
 import { UploadResp } from "@/extraType";
 import { getImageDimension } from "@/helper";
@@ -55,9 +61,9 @@ export default defineComponent({
           ...imageDefaultProps,
         },
       };
-      console.log(resp.data); //  TODO: 使用线上地址, 这里暂时使用本地内存图片地址, 后面服务端开发完成后替换
-      // componentData.props.src = resp.data.url;
-      componentData.props.src = URL.createObjectURL(file);
+      console.log(resp); //  TODO: 使用线上地址, 这里暂时使用本地内存图片地址, 后面服务端开发完成后替换
+      componentData.props.src = resp.data.url;
+      // componentData.props.src = URL.createObjectURL(file);
       getImageDimension(file).then(({ width }) => {
         const maxWidth = 260;
         componentData.props.width =

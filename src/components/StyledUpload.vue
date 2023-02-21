@@ -2,7 +2,7 @@
   <div class="styled-upload">
     <upload-file
       class="styled-uploader"
-      action="/api/lego/upload"
+      action="http://127.0.0.1:7001/api/upload-img"
       :show-upload-list="false"
       :before-upload="commonUploadCheck"
       @success="handleUploadSuccess"

@@ -2,7 +2,7 @@ import { defineComponent, computed, PropType, VNode } from "vue";
 import { reduce } from "lodash-es";
 import { TextComponentProps } from "@/defaultProps";
 import { mapPropsToForms } from "@/propsMap";
-import { Input, InputNumber, Slider, Radio, Select } from "ant-design-vue";
+import { Input, InputNumber, Slider, Radio, Select, Image } from "ant-design-vue";
 
 const mapToComponent = {
   "a-textarea": Input.TextArea,
@@ -12,6 +12,7 @@ const mapToComponent = {
   "a-radio-button": Radio.Button,
   "a-select": Select,
   "a-select-option": Select.Option,
+  'a-image': Image
 } as any;
 
 interface FormProps {

@@ -65,6 +65,8 @@ import { Rule } from "ant-design-vue/lib/form/interface";
 import { GlobalDataProps } from "@/store";
 import { message } from "ant-design-vue";
 import axios from "axios";
+import UsersService from "@/api/users";
+
 export default defineComponent({
   name: "LoginPage",
   setup() {
@@ -105,12 +107,19 @@ export default defineComponent({
       return !/^1[3-9]\d{9}$/.test(form.cellphone.trim()) || counter.value < 60;
     });
 
-    const getCode = () => {
-      console.log("getCode");
+    const getCode = async () => {
+      try {
+        const result = await UsersService.getVeriCode({
+          phoneNumber: form.cellphone,
+        });
+        message.success(`你获取的验证码是 ${result.data.veriCode}`);
+      } catch (error) {
+        console.error("短信验证码获取失败");
+      }
     };
 
-    const login = () => {
-      store.commit("login");
+    const login = async () => {
+      await store.dispatch("login", form);
       message.success(`欢迎${store.state.user.data?.nickName}, 登录成功!`);
       router.push("/");
     };
