@@ -27,11 +27,12 @@
 <script lang="ts">
 import { defineComponent, computed, PropType, VNode } from "vue";
 import { reduce } from "lodash-es";
-import { TextComponentProps } from "@/defaultProps";
+import { AllComponentProps } from "@/defaultProps";
 import { mapPropsToForms } from "@/propsMap";
 
 import RenderVnode from "@/components/RenderVnode";
 import PickerColor from "@/components/PickerColor.vue";
+import ImageProcesser from "@/components/ImageProcesser.vue";
 
 //  表单渲染的数据结构
 interface FormProps {
@@ -49,7 +50,7 @@ interface FormProps {
 export default defineComponent({
   props: {
     props: {
-      type: Object as PropType<Partial<TextComponentProps>>,
+      type: Object as PropType<Partial<AllComponentProps>>,
       required: true,
     },
   },
@@ -59,7 +60,7 @@ export default defineComponent({
       return reduce(
         props.props,
         (result, value, key) => {
-          const newKey = key as keyof TextComponentProps;
+          const newKey = key as keyof AllComponentProps;
           const item = mapPropsToForms[newKey];
           if (item) {
             const {
@@ -97,6 +98,7 @@ export default defineComponent({
   components: {
     RenderVnode,
     PickerColor,
+    ImageProcesser,
   },
 });
 </script>

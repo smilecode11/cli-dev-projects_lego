@@ -8,6 +8,7 @@ const app = createApp(App);
 
 import "ant-design-vue/dist/antd.css";
 import "lego-bricks/dist/bundle.css";
+import "cropperjs/dist/cropper.css";
 
 // eslint-disable-next-line
 // @ts-ignore

@@ -66,10 +66,12 @@ import {
   FileOutlined,
   CloseOutlined,
 } from "@ant-design/icons-vue";
+import { message as AntdVMessage } from "ant-design-vue";
 import axios from "axios";
 import { last } from "lodash-es";
 import { v4 as uuidV4 } from "uuid";
 type UploadStatus = "ready" | "loading" | "success" | "error";
+import { useRouter } from "vue-router";
 
 export interface UploadFile {
   uid: string;
@@ -124,6 +126,7 @@ export default defineComponent({
     },
   },
   setup(props, context) {
+    const router = useRouter();
     const uploadStatus = ref<UploadStatus>("ready");
     const filesList = ref<UploadFile[]>([]);
     const isDragOver = ref(false);
@@ -153,8 +156,6 @@ export default defineComponent({
 
     //  上传逻辑
     const postFile = (readyFile: UploadFile) => {
-      console.log("_postFile");
-      console.log("action", props.action);
       const formData = new FormData();
       formData.append(readyFile.name, readyFile.raw);
       readyFile.status = "loading"; //  初始文件状态
@@ -177,6 +178,13 @@ export default defineComponent({
         })
         .then((resp) => {
           console.log("__postFile success", resp);
+          if (resp.data.errno !== 0) {
+            if (resp.data.errno === 101004) {
+              //  登录验证失败, 跳转登录页面
+              router.push("/");
+            }
+            return Promise.reject(resp);
+          }
           setTimeout(() => {
             readyFile.status = "success";
             readyFile.process = 100;
@@ -191,6 +199,8 @@ export default defineComponent({
           });
         })
         .catch((error) => {
+          console.log("_catch", error);
+          AntdVMessage.error(error.data.message);
           setTimeout(() => {
             readyFile.status = "error";
             if (props.uploadError) {
@@ -214,9 +224,6 @@ export default defineComponent({
         status: "ready",
         raw: file,
       });
-      console.log("_addFileToList", file);
-      console.log("_props.listType", props.listType);
-
       if (props.listType === "picture") {
         try {
           fileObj.url = URL.createObjectURL(file);

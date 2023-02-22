@@ -33,9 +33,8 @@
 import { defineComponent, computed, ref, watch, nextTick } from "vue";
 import { message } from "ant-design-vue";
 import Cropper from "cropperjs";
-import axios from "axios";
 import { DeleteOutlined, ScissorOutlined } from "@ant-design/icons-vue";
-import StyledUploader from "./StyledUploader.vue";
+import StyledUploader from "./StyledUpload.vue";
 import { UploadResp } from "../extraType";
 interface CropDataProps {
   x: number;
@@ -74,8 +73,8 @@ export default defineComponent({
     watch(showModal, async (newValue) => {
       if (newValue) {
         await nextTick();
-        console.log(cropperImg.value);
         if (cropperImg.value) {
+          console.log("_cropper处理", cropperImg.value);
           cropper = new Cropper(cropperImg.value, {
             crop(event) {
               const { x, y, width, height } = event.detail;
@@ -100,6 +99,7 @@ export default defineComponent({
         const cropperURL =
           baseImageUrl.value +
           `?x-oss-process=image/crop,x_${x},y_${y},w_${width},h_${height}`;
+        context.emit("change", cropperURL);
         // 不使用 阿里云 OSS，拿到截图图片再次上传的处理方法
         // 这里实现还是采用原方法，假如同学们愿意使用重新上传的方法的话，请看下面注释的代码
         // cropper.getCroppedCanvas().toBlob((blob) => {
@@ -116,7 +116,6 @@ export default defineComponent({
         //     })
         //   }
         // })
-        context.emit("change", cropperURL);
       }
       showModal.value = false;
     };
