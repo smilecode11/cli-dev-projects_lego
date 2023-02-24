@@ -1,6 +1,6 @@
 import { Module } from "vuex";
 import { GlobalDataProps } from "../index";
-import UsersService from "@/api/users";
+import UsersService from "@/axios/users";
 
 interface UserDataProps {
   nickName: string;

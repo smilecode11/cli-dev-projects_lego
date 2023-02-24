@@ -1,11 +1,16 @@
 <template>
-  <div @click="setActive(id)" :class="{ active: active }" class="edit-wrapper">
+  <div
+    @click="setActive(id)"
+    class="edit-wrapper"
+    :class="{ active: activeClass }"
+  >
     <slot></slot>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { ComponentProps } from "@/store/modules/editor";
+import { defineComponent, PropType, computed } from "vue";
 export default defineComponent({
   emits: ["set-active"],
   props: {
@@ -17,12 +22,20 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    currentElement: {
+      type: Object as PropType<ComponentProps>,
+      required: true,
+    },
   },
   setup(props, { emit }) {
+    const activeClass = computed(
+      () =>
+        props.active && !(props.currentElement && props.currentElement).isHidden
+    );
     const setActive = (id: string) => {
       emit("set-active", id);
     };
-    return { setActive };
+    return { setActive, activeClass };
   },
 });
 </script>

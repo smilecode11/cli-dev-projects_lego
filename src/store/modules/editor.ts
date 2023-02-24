@@ -1,7 +1,7 @@
 import {
-  TextComponentProps,
   textDefaultProps,
   AllComponentProps,
+  imageDefaultProps,
 } from "@/defaultProps";
 import { v4 as uuidv4 } from "uuid";
 import { Module } from "vuex";
@@ -22,6 +22,12 @@ export interface ComponentProps {
   id: string;
   //    元素名称, 如 l-text, l-image 等
   name: string;
+  //  图层是否锁定
+  isLocked?: boolean;
+  //  图层是否隐藏
+  isHidden?: boolean;
+  //  图层名称
+  layerName?: string;
 }
 
 //  测试数据
@@ -38,6 +44,7 @@ export const testComponents: ComponentProps[] = [
       textAlign: "right",
     },
     name: "l-text",
+    layerName: "图层1",
   },
   {
     id: uuidv4(),
@@ -51,6 +58,7 @@ export const testComponents: ComponentProps[] = [
       textAlign: "center",
     },
     name: "l-text",
+    layerName: "图层2",
   },
   {
     id: uuidv4(),
@@ -67,7 +75,18 @@ export const testComponents: ComponentProps[] = [
       lineHeight: "1.5",
       textAlign: "left",
     },
+    layerName: "图层3",
     name: "l-text",
+  },
+  {
+    id: uuidv4(),
+    name: "l-image",
+    layerName: "图层4",
+    props: {
+      ...imageDefaultProps,
+      src: "http://vue-maker.oss-cn-hangzhou.aliyuncs.com/vue-marker/5f3e3a17c305b1070f455202.jpg",
+      width: "100px",
+    },
   },
 ];
 
@@ -84,12 +103,16 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     setActive: (state, id) => {
       state.currentElement = id;
     },
-    updateComponent: (state, { key, value }) => {
+    updateComponent: (state, { key, value, id, isRoot }) => {
       const updateComponent = state.components.find(
-        (component) => component.id === state.currentElement
+        (component) => component.id === (id || state.currentElement)
       );
       if (updateComponent) {
-        updateComponent.props[key as keyof TextComponentProps] = value;
+        if (isRoot) {
+          updateComponent[key] = value;
+        } else {
+          updateComponent.props[key as keyof AllComponentProps] = value;
+        }
       }
     },
   },

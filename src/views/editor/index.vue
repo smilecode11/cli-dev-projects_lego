@@ -5,6 +5,7 @@
         <components-list
           :list="defaultTextTemplates"
           @onItemClick="handleItemClick"
+          :components-list="components"
         ></components-list>
       </a-col>
       <a-col :span="12" class="editor-wrap">
@@ -15,30 +16,55 @@
             :key="component.id"
             :id="component.id"
             :active="currentElement?.id === component.id"
+            :currentElement="(currentElement as any)"
             @setActive="setActive"
           >
-            <component
-              :is="component.name"
-              v-bind="component.props"
-            ></component>
+            <div v-if="!component.isHidden">
+              <component
+                :is="component.name"
+                v-bind="component.props"
+              ></component>
+            </div>
           </edit-wrapper>
         </div>
       </a-col>
       <a-col :span="6" class="attrs-wrap">
-        <!-- 属性渲染/编辑 -->
-        <props-table
-          v-if="currentElement && currentElement.props"
-          :props="currentElement.props"
-          @change="handleChange"
-        ></props-table>
-        <pre>{{ currentElement?.props }}</pre>
+        <!-- 属性渲染/编辑&图层设置 -->
+        <a-tabs type="card" v-model:activeKey="activePanel">
+          <a-tab-pane key="component" tab="属性设置">
+            <div v-if="currentElement">
+              <props-table
+                v-if="!currentElement.isLocked"
+                :props="currentElement.props"
+                @change="handleChange"
+              ></props-table>
+              <div v-else>
+                <a-empty>
+                  <template #description>
+                    <p>该元素被锁定，无法编辑</p>
+                  </template>
+                </a-empty>
+              </div>
+              <pre>{{ currentElement?.props }}</pre>
+            </div>
+          </a-tab-pane>
+          <a-tab-pane key="layer" tab="图层设置">
+            <layer-list
+              :list="components"
+              :selectedId="((currentElement && currentElement.id) as string)"
+              @change="handleChange"
+              @select="setActive"
+            ></layer-list>
+          </a-tab-pane>
+          <a-tab-pane key="page" tab="页面设置"></a-tab-pane>
+        </a-tabs>
       </a-col>
     </a-row>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
+import { defineComponent, computed, ref } from "vue";
 import { useStore } from "vuex";
 import { GlobalDataProps } from "@/store/index";
 import { ComponentProps } from "@/store/modules/editor";
@@ -49,10 +75,14 @@ import LImage from "@/components/LImage.vue";
 import ComponentsList from "@/components/ComponentsList.vue";
 import EditWrapper from "@/components/EditWrapper.vue";
 import PropsTable from "@/components/PropsTable.vue";
+import LayerList from "@/components/LayerList.vue";
+
+export type TabType = "component" | "layer" | "page";
 
 export default defineComponent({
   name: "EditorPage",
   setup() {
+    const activePanel = ref<TabType>("component");
     const store = useStore<GlobalDataProps>();
     const components = computed(() => store.state.editor.components);
 
@@ -70,8 +100,19 @@ export default defineComponent({
     );
 
     //  表单属性变更监听
-    const handleChange = ({ key, value }: { key: string; value: any }) => {
-      store.commit("editor/updateComponent", { key, value });
+    const handleChange = ({
+      id,
+      key,
+      value,
+      isRoot,
+    }: {
+      id: string;
+      isRoot: boolean;
+      key: string;
+      value: any;
+    }) => {
+      console.log("_handleChange", key, value, id, isRoot);
+      store.commit("editor/updateComponent", { key, value, id, isRoot });
     };
 
     return {
@@ -81,6 +122,7 @@ export default defineComponent({
       setActive,
       currentElement,
       handleChange,
+      activePanel,
     };
   },
   components: {
@@ -89,6 +131,7 @@ export default defineComponent({
     ComponentsList,
     EditWrapper,
     PropsTable,
+    LayerList,
   },
 });
 </script>

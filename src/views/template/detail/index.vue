@@ -23,6 +23,9 @@
         {{ uploadedData.url }}
       </template>
     </UploadFile>
+    <hr />
+    <h3>cropperjs 裁剪功能演示</h3>
+    <CropperDemo></CropperDemo>
   </div>
 </template>
 
@@ -38,6 +41,7 @@ import Hello from "@/components/Hello";
 import PickerColor from "@/components/PickerColor.vue";
 import UploadTest from "@/components/UploadTest.vue";
 import UploadFile from "@/components/UploadFile.vue";
+import CropperDemo from "./CropperDemo.vue";
 
 export default defineComponent({
   name: "TemplateDetailPage",
@@ -93,6 +97,7 @@ export default defineComponent({
     PickerColor,
     UploadTest,
     UploadFile,
+    CropperDemo,
   },
 });
 </script>

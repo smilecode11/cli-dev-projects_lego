@@ -65,7 +65,7 @@ import { Rule } from "ant-design-vue/lib/form/interface";
 import { GlobalDataProps } from "@/store";
 import { message } from "ant-design-vue";
 import axios from "axios";
-import UsersService from "@/api/users";
+import UsersService from "@/axios/users";
 
 export default defineComponent({
   name: "LoginPage",
