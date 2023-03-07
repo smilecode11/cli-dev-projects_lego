@@ -207,7 +207,7 @@ export const mapPropsToForms: PropsToForms = {
         const reg = /\(["'](.+)["']\)/g;
         const matches = reg.exec(v);
         if (matches && matches.length > 1) {
-          console.log(matches);
+          // console.log(matches);
           return matches[1];
         } else {
           return "";

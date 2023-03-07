@@ -12,12 +12,30 @@ export interface EditorProps {
   components: ComponentProps[];
   //    当前编辑的元素 id
   currentElement?: string;
+  //    保存项目的其他信息
+  page: PageData;
+}
+
+export type AllFormProps = AllComponentProps & PageProps;
+
+export interface PageProps {
+  backgroundColor: string;
+  backgroundImage: string;
+  backgroundRepeat: string;
+  backgroundSize: string;
+  height: string;
+}
+
+export interface PageData {
+  title: string;
+  props: PageProps;
 }
 
 export interface ComponentProps {
   //    元素属性
   //   props: { [key: string]: unknown };
-  props: { [key in keyof AllComponentProps]?: AllComponentProps[key] };
+  // props: { [key in keyof AllComponentProps]?: AllComponentProps[key] };
+  props: Partial<AllComponentProps>;
   //    元素 id: uuidv4 生成
   id: string;
   //    元素名称, 如 l-text, l-image 等
@@ -90,11 +108,24 @@ export const testComponents: ComponentProps[] = [
   },
 ];
 
+const pageDefaultProps = {
+  backgroundColor: "#ffffff",
+  backgroundImage:
+    "url('https://static.imooc-lego.com/upload-files/%E5%B9%BC%E5%84%BF%E5%9B%AD%E8%83%8C%E6%99%AF%E5%9B%BE-994372.jpg')",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "cover",
+  height: "560px",
+};
+
 const editor: Module<EditorProps, GlobalDataProps> = {
   namespaced: true, //  启动命名空间
   state: {
     components: testComponents,
     currentElement: "",
+    page: {
+      props: pageDefaultProps,
+      title: "test title",
+    },
   },
   mutations: {
     addComponent: (state, component: ComponentProps) => {
@@ -114,6 +145,9 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           updateComponent.props[key as keyof AllComponentProps] = value;
         }
       }
+    },
+    updatePage: (state, { key, value }) => {
+      state.page.props[key as keyof PageProps] = value;
     },
   },
   getters: {

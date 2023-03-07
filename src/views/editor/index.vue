@@ -10,22 +10,24 @@
       </a-col>
       <a-col :span="12" class="editor-wrap">
         <div class="control">
-          <!-- 动态渲染组件 -->
-          <edit-wrapper
-            v-for="component in components"
-            :key="component.id"
-            :id="component.id"
-            :active="currentElement?.id === component.id"
-            :currentElement="(currentElement as any)"
-            @setActive="setActive"
-          >
-            <div v-if="!component.isHidden">
-              <component
-                :is="component.name"
-                v-bind="component.props"
-              ></component>
-            </div>
-          </edit-wrapper>
+          <div class="body-container" :style="page.props">
+            <!-- 动态渲染组件 -->
+            <edit-wrapper
+              v-for="component in components"
+              :key="component.id"
+              :id="component.id"
+              :active="currentElement?.id === component.id"
+              :currentElement="(currentElement as any)"
+              @setActive="setActive"
+            >
+              <div v-if="!component.isHidden">
+                <component
+                  :is="component.name"
+                  v-bind="component.props"
+                ></component>
+              </div>
+            </edit-wrapper>
+          </div>
         </div>
       </a-col>
       <a-col :span="6" class="attrs-wrap">
@@ -38,11 +40,6 @@
                 :props="currentElement.props"
                 @change="handleChange"
               ></edit-groups>
-              <!-- <props-table
-                v-if="!currentElement.isLocked"
-                :props="currentElement.props"
-                @change="handleChange"
-              ></props-table> -->
               <div v-else>
                 <a-empty>
                   <template #description>
@@ -50,7 +47,6 @@
                   </template>
                 </a-empty>
               </div>
-              <pre>{{ currentElement?.props }}</pre>
             </div>
           </a-tab-pane>
           <a-tab-pane key="layer" tab="图层设置">
@@ -61,7 +57,9 @@
               @select="setActive"
             ></layer-list>
           </a-tab-pane>
-          <a-tab-pane key="page" tab="页面设置"></a-tab-pane>
+          <a-tab-pane key="page" tab="页面设置">
+            <props-table :props="page.props" @change="pageChange"></props-table>
+          </a-tab-pane>
         </a-tabs>
       </a-col>
     </a-row>
@@ -79,7 +77,7 @@ import LText from "@/components/LText.vue";
 import LImage from "@/components/LImage.vue";
 import ComponentsList from "@/components/ComponentsList.vue";
 import EditWrapper from "@/components/EditWrapper.vue";
-// import PropsTable from "@/components/PropsTable.vue";
+import PropsTable from "@/components/PropsTable.vue";
 import LayerList from "@/components/LayerList.vue";
 import EditGroups from "@/components/EditGroups.vue";
 
@@ -117,8 +115,13 @@ export default defineComponent({
       key: string;
       value: any;
     }) => {
-      console.log("_handleChange", key, value, id, isRoot);
+      // console.log("_handleChange", key, value, id, isRoot);
       store.commit("editor/updateComponent", { key, value, id, isRoot });
+    };
+
+    const page = computed(() => store.state.editor.page);
+    const pageChange = (e: any) => {
+      store.commit("editor/updatePage", e);
     };
 
     return {
@@ -129,6 +132,8 @@ export default defineComponent({
       currentElement,
       handleChange,
       activePanel,
+      page,
+      pageChange,
     };
   },
   components: {
@@ -136,7 +141,7 @@ export default defineComponent({
     LImage,
     ComponentsList,
     EditWrapper,
-    // PropsTable,
+    PropsTable,
     LayerList,
     EditGroups,
   },
@@ -166,6 +171,8 @@ export default defineComponent({
   background: plum;
 }
 .container .editor-wrap .control {
+  overflow-x: hidden;
+  overflow-y: auto;
   min-height: 360px;
   background: aliceblue;
 }
