@@ -1,26 +1,32 @@
 import { mapValues, without } from "lodash-es";
 
 export interface CommonDefaultProps {
+  //  actions
   actionType: string;
   url: string;
+  // size
   height: string;
   width: string | number;
   paddingLeft: string;
   paddingRight: string;
   paddingTop: string;
   paddingBottom: string;
+  cursor: string;
+  // border type
   borderStyle: string;
   borderColor: string;
-  borderWith: string;
   borderRadius: string;
+  borderWidth: string;
+  // shadow and opacity
   boxShadow: string;
   opacity: number | string;
+  //  position and x,y
   position: string;
   left: string;
   right: string;
   top: string;
   bottom: string;
-  cursor: string;
+  backgroundImage: string;
 }
 
 export interface TextComponentProps extends CommonDefaultProps {
@@ -57,7 +63,7 @@ export const commonDefaultProps: CommonDefaultProps = {
   //    border type
   borderStyle: "none",
   borderColor: "#000",
-  borderWith: "0",
+  borderWidth: "0",
   borderRadius: "0",
   //    shadow and opacity
   boxShadow: "0 0 0 #000000",
@@ -69,6 +75,7 @@ export const commonDefaultProps: CommonDefaultProps = {
   top: "0",
   bottom: "0",
   cursor: "normal",
+  backgroundImage: "",
 };
 
 /** 文本属性*/

@@ -33,11 +33,16 @@
         <a-tabs type="card" v-model:activeKey="activePanel">
           <a-tab-pane key="component" tab="属性设置">
             <div v-if="currentElement">
-              <props-table
+              <edit-groups
                 v-if="!currentElement.isLocked"
                 :props="currentElement.props"
                 @change="handleChange"
-              ></props-table>
+              ></edit-groups>
+              <!-- <props-table
+                v-if="!currentElement.isLocked"
+                :props="currentElement.props"
+                @change="handleChange"
+              ></props-table> -->
               <div v-else>
                 <a-empty>
                   <template #description>
@@ -74,8 +79,9 @@ import LText from "@/components/LText.vue";
 import LImage from "@/components/LImage.vue";
 import ComponentsList from "@/components/ComponentsList.vue";
 import EditWrapper from "@/components/EditWrapper.vue";
-import PropsTable from "@/components/PropsTable.vue";
+// import PropsTable from "@/components/PropsTable.vue";
 import LayerList from "@/components/LayerList.vue";
+import EditGroups from "@/components/EditGroups.vue";
 
 export type TabType = "component" | "layer" | "page";
 
@@ -130,8 +136,9 @@ export default defineComponent({
     LImage,
     ComponentsList,
     EditWrapper,
-    PropsTable,
+    // PropsTable,
     LayerList,
+    EditGroups,
   },
 });
 </script>

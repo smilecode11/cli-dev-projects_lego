@@ -33,6 +33,7 @@ import { mapPropsToForms } from "@/propsMap";
 import RenderVnode from "@/components/RenderVnode";
 import PickerColor from "@/components/PickerColor.vue";
 import ImageProcesser from "@/components/ImageProcesser.vue";
+import IconSwitch from "@/components/IconSwitch.vue";
 
 //  表单渲染的数据结构
 interface FormProps {
@@ -99,6 +100,7 @@ export default defineComponent({
     RenderVnode,
     PickerColor,
     ImageProcesser,
+    IconSwitch,
   },
 });
 </script>
