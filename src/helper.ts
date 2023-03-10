@@ -34,7 +34,7 @@ export const commonUploadCheck = (file: File) => {
   if (error === "size") {
     message.error("上传图片大小不能超过 2MB");
   }
-  console.log("_commonUploadCheck", passed);
+  // console.log("_commonUploadCheck", passed);
   return passed;
 };
 

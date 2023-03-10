@@ -26,6 +26,9 @@
     <hr />
     <h3>cropperjs 裁剪功能演示</h3>
     <CropperDemo></CropperDemo>
+    <hr />
+    <h3>MouseDemo 演示</h3>
+    <MouseDemo></MouseDemo>
   </div>
 </template>
 
@@ -42,6 +45,7 @@ import PickerColor from "@/components/PickerColor.vue";
 import UploadTest from "@/components/UploadTest.vue";
 import UploadFile from "@/components/UploadFile.vue";
 import CropperDemo from "./CropperDemo.vue";
+import MouseDemo from "./MouseDemo.vue";
 
 export default defineComponent({
   name: "TemplateDetailPage",
@@ -98,6 +102,7 @@ export default defineComponent({
     UploadTest,
     UploadFile,
     CropperDemo,
+    MouseDemo,
   },
 });
 </script>

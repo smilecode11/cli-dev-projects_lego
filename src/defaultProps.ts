@@ -26,7 +26,6 @@ export interface CommonDefaultProps {
   right: string;
   top: string;
   bottom: string;
-  backgroundImage: string;
 }
 
 export interface TextComponentProps extends CommonDefaultProps {
@@ -75,7 +74,6 @@ export const commonDefaultProps: CommonDefaultProps = {
   top: "0",
   bottom: "0",
   cursor: "normal",
-  backgroundImage: "",
 };
 
 /** 文本属性*/

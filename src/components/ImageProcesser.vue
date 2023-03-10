@@ -126,6 +126,7 @@ export default defineComponent({
       context.emit("uploaded", data);
     };
     const handleDelete = () => {
+      console.log("_handleDelete");
       context.emit("change", "");
     };
     return {

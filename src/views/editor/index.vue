@@ -9,7 +9,7 @@
         ></components-list>
       </a-col>
       <a-col :span="12" class="editor-wrap">
-        <div class="control">
+        <div class="control" id="canvas-area">
           <div class="body-container" :style="page.props">
             <!-- 动态渲染组件 -->
             <edit-wrapper
@@ -18,7 +18,10 @@
               :id="component.id"
               :active="currentElement?.id === component.id"
               :currentElement="(currentElement as any)"
+              :props="component.props"
+              :hidden="component.isHidden"
               @setActive="setActive"
+              @update-position="updatePosition"
             >
               <div v-if="!component.isHidden">
                 <component
@@ -72,6 +75,7 @@ import { useStore } from "vuex";
 import { GlobalDataProps } from "@/store/index";
 import { ComponentProps } from "@/store/modules/editor";
 import { defaultTextTemplates } from "@/defaultTemplates";
+import { pickBy, forEach } from "lodash-es";
 
 import LText from "@/components/LText.vue";
 import LImage from "@/components/LImage.vue";
@@ -124,6 +128,28 @@ export default defineComponent({
       store.commit("editor/updatePage", e);
     };
 
+    const updatePosition = (data: {
+      left: number;
+      top: number;
+      id: string;
+    }) => {
+      const { id } = data;
+      const positionData = pickBy(data, (v, k) => k !== "id");
+      console.log("_positionData", positionData);
+      forEach(positionData, (value, key) => {
+        store.commit("editor/updateComponent", {
+          key,
+          value: value + "px",
+          id,
+        });
+      });
+      // store.commit("editor/updateComponent", {
+      //   key: "top",
+      //   value: top + "px",
+      //   id,
+      // });
+    };
+
     return {
       components,
       defaultTextTemplates,
@@ -134,6 +160,7 @@ export default defineComponent({
       activePanel,
       page,
       pageChange,
+      updatePosition,
     };
   },
   components: {
@@ -171,11 +198,21 @@ export default defineComponent({
   background: plum;
 }
 .container .editor-wrap .control {
+  padding: 0;
+  margin: 0;
+  min-width: 375px;
+  min-height: 200px;
+  border: 1px solid #efefef;
+  background: #fff;
   overflow-x: hidden;
   overflow-y: auto;
-  min-height: 360px;
-  background: aliceblue;
+  position: fixed;
+  margin-top: 50px;
+  max-height: 80vh;
 }
+.control .body-container {
+}
+
 .container .attrs-wrap {
   background: aliceblue;
 }

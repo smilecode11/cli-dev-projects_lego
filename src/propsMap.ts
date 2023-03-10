@@ -1,5 +1,6 @@
 import { h, VNode } from "vue";
 import { AllComponentProps } from "@/defaultProps";
+import { AllFormProps } from "@/store/modules/editor";
 
 export interface PropToForm {
   component: string;
@@ -14,7 +15,7 @@ export interface PropToForm {
 }
 
 export type PropsToForms = {
-  [P in keyof AllComponentProps]?: PropToForm;
+  [P in keyof AllFormProps]?: PropToForm;
 };
 
 const fontFamilyArray = [
@@ -204,10 +205,10 @@ export const mapPropsToForms: PropsToForms = {
     component: "background-processer",
     initalTransform: (v: string) => {
       if (v) {
+        console.log("_backgroundImage initalTransform", v);
         const reg = /\(["'](.+)["']\)/g;
         const matches = reg.exec(v);
         if (matches && matches.length > 1) {
-          // console.log(matches);
           return matches[1];
         } else {
           return "";

@@ -36,6 +36,7 @@ export default defineComponent({
   emits: ["success"],
   setup(props, context) {
     const handleUploadSuccess = ({ resp, file }: { resp: any; file: File }) => {
+      console.log("_handleUploadSuccess StyledUpload", resp);
       context.emit("success", { resp, file });
     };
 
