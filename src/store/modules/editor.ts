@@ -5,7 +5,9 @@ import {
 } from "@/defaultProps";
 import { v4 as uuidv4 } from "uuid";
 import { Module } from "vuex";
-import { GlobalDataProps } from "../index";
+import store, { GlobalDataProps } from "../index";
+import { cloneDeep } from "lodash-es";
+import { message as antdMessage } from "ant-design-vue";
 
 export interface EditorProps {
   //    供中间便器渲染的组件
@@ -14,6 +16,8 @@ export interface EditorProps {
   currentElement?: string;
   //    保存项目的其他信息
   page: PageData;
+  //    保存拷贝组件
+  copiedComponent?: ComponentProps;
 }
 
 export type AllFormProps = AllComponentProps & PageProps;
@@ -117,6 +121,8 @@ const pageDefaultProps = {
   height: "560px",
 };
 
+export type MoveDirection = "Up" | "Down" | "Left" | "Right";
+
 const editor: Module<EditorProps, GlobalDataProps> = {
   namespaced: true, //  启动命名空间
   state: {
@@ -133,6 +139,88 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     },
     setActive: (state, id) => {
       state.currentElement = id;
+    },
+    copyComponent: (state, id) => {
+      const currentComponent = state.components.find(
+        (component) => component.id === id
+      );
+      if (currentComponent) {
+        state.copiedComponent = currentComponent;
+        antdMessage.success("已拷贝当前图层", 1);
+      }
+    },
+    pasteCopiedComponent: (state) => {
+      if (state.copiedComponent) {
+        const newComponent = cloneDeep(state.copiedComponent);
+        newComponent.id = uuidv4();
+        newComponent.layerName = `${newComponent.layerName}副本`;
+        state.components.push(newComponent);
+        antdMessage.success("已黏贴当前图层", 1);
+      }
+    },
+    deleteComponent: (state, id) => {
+      const currentComponent = state.components.find(
+        (component) => component.id === id
+      );
+      if (currentComponent) {
+        state.components = state.components.filter(
+          (component) => component.id !== id
+        );
+        antdMessage.success("删除当前图层成功", 1);
+      }
+    },
+    moveComponent: (
+      state,
+      data: { direction: MoveDirection; amount: number; id: string }
+    ) => {
+      const currentComponent = state.components.find(
+        (component) => component.id === data.id
+      );
+      if (currentComponent) {
+        const oldTop = parseInt(currentComponent.props.top || "0");
+        const oldLeft = parseInt(currentComponent.props.left || "0");
+        const { direction, amount } = data;
+        switch (direction) {
+          case "Up": {
+            const newValue = `${oldTop - amount}px`;
+            store.commit("editor/updateComponent", {
+              key: "top",
+              value: newValue,
+              id: data.id,
+            });
+            break;
+          }
+          case "Down": {
+            const newValue = `${oldTop + amount}px`;
+            store.commit("editor/updateComponent", {
+              key: "top",
+              value: newValue,
+              id: data.id,
+            });
+            break;
+          }
+          case "Left": {
+            const newValue = `${oldLeft - amount}px`;
+            store.commit("editor/updateComponent", {
+              key: "left",
+              value: newValue,
+              id: data.id,
+            });
+            break;
+          }
+          case "Right": {
+            const newValue = `${oldLeft + amount}px`;
+            store.commit("editor/updateComponent", {
+              key: "left",
+              value: newValue,
+              id: data.id,
+            });
+            break;
+          }
+          default:
+            break;
+        }
+      }
     },
     updateComponent: (state, { key, value, id, isRoot }) => {
       const updateComponent = state.components.find(

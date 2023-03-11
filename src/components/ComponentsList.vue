@@ -22,16 +22,7 @@ import { defineComponent, PropType, computed } from "vue";
 import StyledUpload from "@/components/StyledUpload.vue";
 import LText from "@/components/LText.vue";
 import { v4 as uuidV4 } from "uuid";
-// import {
-//   imageDefaultProps,
-//   TextComponentProps,
-//   textDefaultProps,
-// } from "@/defaultProps";
-import {
-  imageDefaultProps,
-  TextComponentProps,
-  textDefaultProps,
-} from "lego-bricks";
+import { imageDefaultProps, TextComponentProps } from "lego-bricks";
 import { ComponentProps } from "@/store/modules/editor";
 import { UploadResp } from "@/extraType";
 import { getImageDimension } from "@/helper";
@@ -56,7 +47,7 @@ export default defineComponent({
       const componentData: ComponentProps = {
         name: "l-text",
         id: uuidV4(),
-        props: { ...textDefaultProps, ...props },
+        props: { ...props }, //  拷贝属性, 文字组件引用关系
         layerName: `图层${listSourceLen.value}`,
       };
       emit("on-item-click", componentData);

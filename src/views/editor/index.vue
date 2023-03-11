@@ -74,7 +74,7 @@ import { defineComponent, computed, ref } from "vue";
 import { useStore } from "vuex";
 import { GlobalDataProps } from "@/store/index";
 import { ComponentProps } from "@/store/modules/editor";
-import { defaultTextTemplates } from "@/defaultTemplates";
+import defaultTextTemplates from "@/defaultTemplates";
 import { pickBy, forEach } from "lodash-es";
 
 import LText from "@/components/LText.vue";
@@ -84,12 +84,15 @@ import EditWrapper from "@/components/EditWrapper.vue";
 import PropsTable from "@/components/PropsTable.vue";
 import LayerList from "@/components/LayerList.vue";
 import EditGroups from "@/components/EditGroups.vue";
+import initHotKeys from "@/plugins/hotKeys";
 
 export type TabType = "component" | "layer" | "page";
 
 export default defineComponent({
   name: "EditorPage",
   setup() {
+    initHotKeys();
+
     const activePanel = ref<TabType>("component");
     const store = useStore<GlobalDataProps>();
     const components = computed(() => store.state.editor.components);
@@ -135,7 +138,6 @@ export default defineComponent({
     }) => {
       const { id } = data;
       const positionData = pickBy(data, (v, k) => k !== "id");
-      console.log("_positionData", positionData);
       forEach(positionData, (value, key) => {
         store.commit("editor/updateComponent", {
           key,
@@ -143,11 +145,6 @@ export default defineComponent({
           id,
         });
       });
-      // store.commit("editor/updateComponent", {
-      //   key: "top",
-      //   value: top + "px",
-      //   id,
-      // });
     };
 
     return {
