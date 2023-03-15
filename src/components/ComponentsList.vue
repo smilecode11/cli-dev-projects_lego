@@ -40,15 +40,15 @@ export default defineComponent({
   },
   emits: ["on-item-click"],
   setup(props, { emit }) {
-    const listSourceLen = computed(
-      () => (props.componentsList?.length as number) + 1
-    );
+    // const listSourceLen = computed(
+    //   () => (props.componentsList?.length as number) + 1
+    // );
     const onItemClick = (props: Partial<TextComponentProps>) => {
       const componentData: ComponentProps = {
         name: "l-text",
         id: uuidV4(),
         props: { ...props }, //  拷贝属性, 文字组件引用关系
-        layerName: `图层${listSourceLen.value}`,
+        // layerName: `图层${listSourceLen.value}`,
       };
       emit("on-item-click", componentData);
     };
@@ -61,7 +61,7 @@ export default defineComponent({
         props: {
           ...imageDefaultProps,
         },
-        layerName: `图层${listSourceLen.value}`,
+        // layerName: `图层${listSourceLen.value}`,
       };
       console.log(resp); //  TODO: 使用线上地址, 这里暂时使用本地内存图片地址, 后面服务端开发完成后替换
       componentData.props.src = resp.data.url;

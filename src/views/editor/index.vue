@@ -9,6 +9,7 @@
         ></components-list>
       </a-col>
       <a-col :span="12" class="editor-wrap">
+        <history-area></history-area>
         <div class="control" id="canvas-area">
           <div class="body-container" :style="page.props">
             <!-- 动态渲染组件 -->
@@ -84,6 +85,7 @@ import EditWrapper from "@/components/EditWrapper.vue";
 import PropsTable from "@/components/PropsTable.vue";
 import LayerList from "@/components/LayerList.vue";
 import EditGroups from "@/components/EditGroups.vue";
+import HistoryArea from "./HistoryArea.vue";
 import initHotKeys from "@/plugins/hotKeys";
 
 export type TabType = "component" | "layer" | "page";
@@ -138,13 +140,21 @@ export default defineComponent({
     }) => {
       const { id } = data;
       const positionData = pickBy(data, (v, k) => k !== "id");
-      forEach(positionData, (value, key) => {
-        store.commit("editor/updateComponent", {
-          key,
-          value: value + "px",
-          id,
-        });
+      // console.log("_positionData", positionData);
+      const keysArr = Object.keys(positionData);
+      const valuesArr = Object.values(positionData).map((v) => `${v}px`);
+      store.commit("editor/updateComponent", {
+        key: keysArr,
+        value: valuesArr,
+        id,
       });
+      // forEach(positionData, (value, key) => {
+      //   store.commit("editor/updateComponent", {
+      //     key,
+      //     value: value + "px",
+      //     id,
+      //   });
+      // });
     };
 
     return {
@@ -168,6 +178,7 @@ export default defineComponent({
     PropsTable,
     LayerList,
     EditGroups,
+    HistoryArea,
   },
 });
 </script>

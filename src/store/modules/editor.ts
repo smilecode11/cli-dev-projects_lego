@@ -1,13 +1,22 @@
+import { Module } from "vuex";
+import { message as antdMessage } from "ant-design-vue";
+import { v4 as uuidv4 } from "uuid";
+import { cloneDeep } from "lodash-es";
+import store, { GlobalDataProps } from "../index";
+import { insertAt } from "@/helper";
 import {
   textDefaultProps,
   AllComponentProps,
   imageDefaultProps,
 } from "@/defaultProps";
-import { v4 as uuidv4 } from "uuid";
-import { Module } from "vuex";
-import store, { GlobalDataProps } from "../index";
-import { cloneDeep } from "lodash-es";
-import { message as antdMessage } from "ant-design-vue";
+
+export interface HistoryProps {
+  id: string;
+  componentId: string;
+  type: "add" | "delete" | "modify";
+  data: any;
+  index?: number;
+}
 
 export interface EditorProps {
   //    供中间便器渲染的组件
@@ -18,6 +27,10 @@ export interface EditorProps {
   page: PageData;
   //    保存拷贝组件
   copiedComponent?: ComponentProps;
+  histories: HistoryProps[];
+  historyIndex: number;
+  maxHistoryNumber: number;
+  cachedOldValues?: any; //  开始更新的缓存值
 }
 
 export type AllFormProps = AllComponentProps & PageProps;
@@ -50,6 +63,13 @@ export interface ComponentProps {
   isHidden?: boolean;
   //  图层名称
   layerName?: string;
+}
+
+export interface updateComponentData {
+  key: keyof AllComponentProps | Array<keyof AllComponentProps>;
+  value: string | string[];
+  id: string;
+  isRoot?: boolean;
 }
 
 //  测试数据
@@ -123,6 +143,81 @@ const pageDefaultProps = {
 
 export type MoveDirection = "Up" | "Down" | "Left" | "Right";
 
+/** 属性变化防抖函数*/
+const debounceChange = (callback: (...args: any) => void, timeout = 1000) => {
+  let timer = 0;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      timer = 0;
+      callback(...args);
+    }, timeout);
+  };
+};
+
+/** 添加/删除/更新组件等界面操作添加历史记录*/
+const pushHistory = (state: EditorProps, historyRecord: HistoryProps) => {
+  if (state.historyIndex !== -1) {
+    // 历史记录移动过, 删除大于索引的所有操作记录
+    state.histories = state.histories.slice(0, state.historyIndex);
+    // 重置历史记录索引
+    state.historyIndex = -1;
+  }
+  // 保存历史记录长度限制处理
+  if (state.histories.length < state.maxHistoryNumber) {
+    state.histories.push(historyRecord);
+  } else {
+    state.histories.shift();
+    state.histories.push(historyRecord);
+  }
+};
+
+//  更新记录
+const pushModifyHistory = (
+  state: EditorProps,
+  { key, value, id }: updateComponentData
+) => {
+  pushHistory(state, {
+    id: uuidv4(),
+    componentId: id || (state.currentElement as string),
+    type: "modify",
+    data: {
+      oldValue: state.cachedOldValues,
+      newValue: value,
+      key,
+    },
+  });
+  state.cachedOldValues = null; //  更新记录后重置开始的缓存值
+};
+
+const pushHistoryDebounce = debounceChange(pushModifyHistory);
+
+/** 历史记录 - 属性更新*/
+const modifyHistory = (
+  state: EditorProps,
+  history: HistoryProps,
+  type: "undo" | "redo"
+) => {
+  const { componentId, data } = history;
+  const { key, oldValue, newValue } = data;
+  const newKey = key as
+    | keyof AllComponentProps
+    | Array<keyof AllComponentProps>;
+  const updatedComponent = state.components.find(
+    (component) => component.id === componentId
+  );
+  if (updatedComponent) {
+    if (Array.isArray(newKey)) {
+      newKey.forEach((kName, index) => {
+        updatedComponent.props[kName] =
+          type === "undo" ? oldValue[index] : newValue[index];
+      });
+    } else {
+      updatedComponent.props[key] = type === "undo" ? oldValue : newValue;
+    }
+  }
+};
+
 const editor: Module<EditorProps, GlobalDataProps> = {
   namespaced: true, //  启动命名空间
   state: {
@@ -132,13 +227,94 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       props: pageDefaultProps,
       title: "test title",
     },
+    histories: [],
+    historyIndex: -1,
+    maxHistoryNumber: 10,
+    cachedOldValues: null,
   },
   mutations: {
     addComponent: (state, component: ComponentProps) => {
+      component.layerName = "图层" + (state.components.length + 1);
       state.components.push(component);
+
+      pushHistory(state, {
+        id: uuidv4(),
+        componentId: component.id,
+        type: "add",
+        data: cloneDeep(component),
+      });
     },
     setActive: (state, id) => {
       state.currentElement = id;
+    },
+    // 撤销
+    undo(state) {
+      //  没有进行撤销操作时, 记录的历史记录索引是最后一位
+      if (state.historyIndex === -1) {
+        state.historyIndex = state.histories.length - 1;
+      } else {
+        state.historyIndex--;
+      }
+      //  获取正确历史记录
+      const history = state.histories[state.historyIndex];
+      switch (history.type) {
+        case "add": //  如果历史记录的是新增, 我们需要对其进行删除操作
+          state.components = state.components.filter(
+            (component) => component.id !== history.componentId
+          );
+          break;
+        case "delete": //  如果历史记录的是删除, 我们需要在指定位置新增数据
+          state.components = insertAt(
+            state.components,
+            history.index as number,
+            history.data
+          );
+          break;
+        case "modify": {
+          modifyHistory(state, history, "undo");
+          //  如果历史记录是更新, 我们需要还原原来的数据
+          // const { componentId, data } = history;
+          // const { key, oldValue } = data;
+          // const updatedComponent = state.components.find(
+          //   (component) => component.id === componentId
+          // );
+          // if (updatedComponent) {
+          //   updatedComponent.props[key as keyof AllComponentProps] = oldValue;
+          // }
+          break;
+        }
+        default:
+          break;
+      }
+    },
+    // 恢复(重做)
+    redo(state) {
+      if (state.historyIndex === -1) return;
+      const history = state.histories[state.historyIndex];
+      switch (history.type) {
+        case "add":
+          state.components.push(history.data);
+          break;
+        case "delete":
+          state.components = state.components.filter(
+            (component) => component.id !== history.componentId
+          );
+          break;
+        case "modify": {
+          modifyHistory(state, history, "redo");
+          //  如果历史记录是更新, 我们需要还原原来的数据
+          // const { componentId, data } = history;
+          // const { key, newValue } = data;
+          // const updatedComponent = state.components.find(
+          //   (component) => component.id === componentId
+          // );
+          // if (updatedComponent) {
+          //   updatedComponent.props[key as keyof AllComponentProps] = newValue;
+          // }
+          break;
+        }
+      }
+      state.historyIndex++;
     },
     copyComponent: (state, id) => {
       const currentComponent = state.components.find(
@@ -156,6 +332,13 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         newComponent.layerName = `${newComponent.layerName}副本`;
         state.components.push(newComponent);
         antdMessage.success("已黏贴当前图层", 1);
+
+        pushHistory(state, {
+          id: uuidv4(),
+          componentId: newComponent.id,
+          type: "add",
+          data: cloneDeep(newComponent),
+        });
       }
     },
     deleteComponent: (state, id) => {
@@ -167,6 +350,17 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           (component) => component.id !== id
         );
         antdMessage.success("删除当前图层成功", 1);
+
+        const currentIndex = state.components.findIndex(
+          (component) => component.id === id
+        );
+        pushHistory(state, {
+          id: uuidv4(),
+          componentId: currentComponent.id,
+          type: "delete",
+          index: currentIndex,
+          data: currentComponent,
+        });
       }
     },
     moveComponent: (
@@ -222,15 +416,45 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         }
       }
     },
-    updateComponent: (state, { key, value, id, isRoot }) => {
+    updateComponent: (
+      state,
+      { key, value, id, isRoot }: updateComponentData
+    ) => {
       const updateComponent = state.components.find(
         (component) => component.id === (id || state.currentElement)
       );
       if (updateComponent) {
         if (isRoot) {
-          updateComponent[key] = value;
+          updateComponent[key as string] = value;
         } else {
-          updateComponent.props[key as keyof AllComponentProps] = value;
+          //  区分处理传入的 key 和 value 是 array 情况
+          const oldValue = Array.isArray(key)
+            ? key.map((k) => updateComponent.props[k])
+            : updateComponent.props[key];
+          if (!state.cachedOldValues) {
+            state.cachedOldValues = oldValue;
+          }
+          //  添加到历史记录
+          pushHistoryDebounce(state, { key, value, id });
+          if (Array.isArray(key) && Array.isArray(value)) {
+            key.forEach((kName, index) => {
+              updateComponent.props[kName] = value[index];
+            });
+          } else if (typeof key === "string" && typeof value === "string") {
+            updateComponent.props[key] = value;
+          }
+          //  历史记录
+          // pushHistory(state, {
+          //   id: uuidv4(),
+          //   componentId: updateComponent.id,
+          //   type: "modify",
+          //   data: {
+          //     oldValue: updateComponent.props[key],
+          //     newValue: value,
+          //     key,
+          //   },
+          // });
+          // updateComponent.props[key as keyof AllComponentProps] = value;
         }
       }
     },
@@ -243,6 +467,23 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       state.components.find(
         (component) => component.id === state.currentElement
       ),
+    checkUndoDisable: (state) => {
+      //  撤销不能使用: 无历史记录/已经是历史记录第一个
+      if (state.histories.length === 0 || state.historyIndex === 0) {
+        return true;
+      }
+      return false;
+    },
+    checkRedoDisable: (state) => {
+      if (
+        state.histories.length === 0 ||
+        state.historyIndex === -1 ||
+        state.histories.length === state.historyIndex
+      ) {
+        return true;
+      }
+      return false;
+    },
   },
 };
 
