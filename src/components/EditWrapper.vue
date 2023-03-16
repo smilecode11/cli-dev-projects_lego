@@ -6,6 +6,7 @@
     :class="{ actived: active, hidden: hidden }"
     :style="styles"
     ref="editWrapper"
+    :data-component-id="id"
   >
     <div class="slot-control">
       <slot></slot>

@@ -50,8 +50,6 @@ export interface PageData {
 
 export interface ComponentProps {
   //    元素属性
-  //   props: { [key: string]: unknown };
-  // props: { [key in keyof AllComponentProps]?: AllComponentProps[key] };
   props: Partial<AllComponentProps>;
   //    元素 id: uuidv4 生成
   id: string;
@@ -229,7 +227,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     },
     histories: [],
     historyIndex: -1,
-    maxHistoryNumber: 10,
+    maxHistoryNumber: 5,
     cachedOldValues: null,
   },
   mutations: {
@@ -272,15 +270,6 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           break;
         case "modify": {
           modifyHistory(state, history, "undo");
-          //  如果历史记录是更新, 我们需要还原原来的数据
-          // const { componentId, data } = history;
-          // const { key, oldValue } = data;
-          // const updatedComponent = state.components.find(
-          //   (component) => component.id === componentId
-          // );
-          // if (updatedComponent) {
-          //   updatedComponent.props[key as keyof AllComponentProps] = oldValue;
-          // }
           break;
         }
         default:
@@ -302,15 +291,6 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           break;
         case "modify": {
           modifyHistory(state, history, "redo");
-          //  如果历史记录是更新, 我们需要还原原来的数据
-          // const { componentId, data } = history;
-          // const { key, newValue } = data;
-          // const updatedComponent = state.components.find(
-          //   (component) => component.id === componentId
-          // );
-          // if (updatedComponent) {
-          //   updatedComponent.props[key as keyof AllComponentProps] = newValue;
-          // }
           break;
         }
       }
@@ -443,18 +423,6 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           } else if (typeof key === "string" && typeof value === "string") {
             updateComponent.props[key] = value;
           }
-          //  历史记录
-          // pushHistory(state, {
-          //   id: uuidv4(),
-          //   componentId: updateComponent.id,
-          //   type: "modify",
-          //   data: {
-          //     oldValue: updateComponent.props[key],
-          //     newValue: value,
-          //     key,
-          //   },
-          // });
-          // updateComponent.props[key as keyof AllComponentProps] = value;
         }
       }
     },

@@ -87,13 +87,15 @@ import LayerList from "@/components/LayerList.vue";
 import EditGroups from "@/components/EditGroups.vue";
 import HistoryArea from "./HistoryArea.vue";
 import initHotKeys from "@/plugins/hotKeys";
+import initContextMenu from "@/plugins/contextMenu";
 
 export type TabType = "component" | "layer" | "page";
 
 export default defineComponent({
   name: "EditorPage",
   setup() {
-    initHotKeys();
+    initHotKeys(); //  键盘插件
+    initContextMenu(); //  右键菜单插件
 
     const activePanel = ref<TabType>("component");
     const store = useStore<GlobalDataProps>();
