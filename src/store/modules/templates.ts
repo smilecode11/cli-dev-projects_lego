@@ -1,5 +1,7 @@
 import { Module } from "vuex";
 import { GlobalDataProps } from "../index";
+import ApiService from "@/axios/index";
+import { RespListData } from "@/store/respTypes";
 
 export interface TemplateProps {
   id: number;
@@ -9,6 +11,7 @@ export interface TemplateProps {
   copiedCount: number;
   isHot?: boolean;
   isNew?: boolean;
+  desc?: string;
 }
 
 export interface TemplatesProps {
@@ -25,7 +28,15 @@ export const testData: TemplateProps[] = [
 
 const templates: Module<TemplatesProps, GlobalDataProps> = {
   state: {
-    data: testData,
+    data: [],
+  },
+  actions: {
+    fetchTemplates(context) {
+      ApiService.get(`/api/templates?pageSize=8&pageIndex=0`).then((resp) => {
+        console.log("_actions fetchTemplates", resp);
+        context.commit("fetchTemplates", resp);
+      });
+    },
   },
   getters: {
     //  获取模板数据 & id
@@ -35,7 +46,11 @@ const templates: Module<TemplatesProps, GlobalDataProps> = {
         return state.data.find((t) => t.id === id);
       },
   },
-  mutations: {},
+  mutations: {
+    fetchTemplates: (state, payload: RespListData<TemplateProps>) => {
+      state.data = payload.data.list;
+    },
+  },
 };
 
 export default templates;

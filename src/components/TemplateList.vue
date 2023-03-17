@@ -66,6 +66,7 @@ export default defineComponent({
 }
 .poster-item .ant-card-cover > img {
   width: 100%;
+  max-height: 480px;
 }
 .poster-item .ant-card-hoverable {
   box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);

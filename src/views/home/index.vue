@@ -19,11 +19,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, reactive } from "vue";
+import { defineComponent, computed, reactive, onMounted } from "vue";
 import { useStore } from "vuex";
-
 import { GlobalDataProps } from "@/store/index";
-
 import TemplateList from "@/components/TemplateList.vue";
 
 interface ParamsProps {
@@ -41,6 +39,10 @@ export default defineComponent({
 
     const store = useStore<GlobalDataProps>();
     const testData = computed(() => store.state.templates.data);
+    onMounted(() => {
+      //  获取模板列表
+      store.dispatch("fetchTemplates");
+    });
     return { testData, searchParams, onSearchTemplates };
   },
   components: {
