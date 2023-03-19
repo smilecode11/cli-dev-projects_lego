@@ -13,16 +13,18 @@
 
     <!-- 模板列表 -->
     <section>
+      <h1 v-if="isLoading">templates is Loading!</h1>
       <TemplateList :list="testData" />
     </section>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, reactive, onMounted } from "vue";
+import { defineComponent, computed, reactive, onMounted, watch } from "vue";
 import { useStore } from "vuex";
 import { GlobalDataProps } from "@/store/index";
 import TemplateList from "@/components/TemplateList.vue";
+import { message as antdMessage } from "ant-design-vue";
 
 interface ParamsProps {
   keyword?: string;
@@ -38,12 +40,32 @@ export default defineComponent({
     };
 
     const store = useStore<GlobalDataProps>();
+    const isLoading = computed(() =>
+      store.getters.isOpLoading("fetchTemplates")
+    );
+    const error = computed(() => store.state.global.error);
+    watch(
+      () => error.value.status,
+      (errorValue) => {
+        if (errorValue) {
+          antdMessage.error(error.value.message || "未知错误");
+        }
+      }
+    );
     const testData = computed(() => store.state.templates.data);
     onMounted(() => {
       //  获取模板列表
       store.dispatch("fetchTemplates");
+
+      // 登录状态持久化
+      // if (!store.state.user.isLogin && localStorage.getItem("token")) {
+      //   store.dispatch("fetchCurrentUser").catch(() => {
+      //     antdMessage.error("登录验证失败, 请重新登录");
+      //     localStorage.removeItem("token"); //  清除 token
+      //   });
+      // }
     });
-    return { testData, searchParams, onSearchTemplates };
+    return { testData, searchParams, onSearchTemplates, isLoading };
   },
   components: {
     TemplateList,

@@ -13,13 +13,22 @@ export class UsersAPi {
   userLoginWithPhone(data: { phoneNumber: string; veriCode: string }) {
     return ApiService.post<{ token: string }>(
       "/api/users/loginByCellphone",
-      data
+      data,
+      {
+        opName: "login",
+      }
     );
   }
 
   /** 获取用户信息*/
   getUserInfo() {
-    return ApiService.post(`/api/users/current`);
+    return ApiService.post(
+      `/api/users/current`,
+      {},
+      {
+        opName: "fetchCurrentUser",
+      }
+    );
   }
 }
 

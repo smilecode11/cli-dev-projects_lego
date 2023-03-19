@@ -7,11 +7,16 @@
             <img src="@/assets/logo2.png" alt="慕课乐高" class="logo-image" />
           </router-link>
           <h2>这是我用过最好的建站工具</h2>
-          <span class="text-white-70">小白, Google</span>
+          <span class="text-white-70"> Smiling</span>
         </div>
       </a-col>
       <a-col :span="12" class="login-area">
-        <a-form layout="vertical" :model="form" :rules="rules" ref="loginRef">
+        <a-form
+          layout="vertical"
+          :model="form"
+          :rules="rules"
+          ref="loginFormRef"
+        >
           <h2>欢迎回来</h2>
           <p class="subTitle">使用手机号码和验证码登录到慕课乐高</p>
           <a-form-item label="手机号码" required name="cellphone">
@@ -45,10 +50,10 @@
               {{ counter === 60 ? "获取验证码" : `${counter}秒后重发` }}
             </a-button>
           </a-form-item>
-          <div class="auth-wrap">
+          <!-- <div class="auth-wrap">
             <a-button @click="handleOAthLogin">gitee 授权登录</a-button>
             <a-button @click="handleTest">测试 OPTION</a-button>
-          </div>
+          </div> -->
         </a-form>
       </a-col>
     </a-row>
@@ -56,30 +61,42 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, computed, onMounted } from "vue";
+import {
+  defineComponent,
+  reactive,
+  ref,
+  computed,
+  onMounted,
+  onUnmounted,
+  Ref,
+  watch,
+} from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { UserOutlined, LockOutlined } from "@ant-design/icons-vue";
 import { Rule } from "ant-design-vue/lib/form/interface";
-
 import { GlobalDataProps } from "@/store";
-import { message } from "ant-design-vue";
-import axios from "axios";
+import { message, Form } from "ant-design-vue";
 import UsersService from "@/axios/users";
+const useForm = Form.useForm;
+
+export interface RuleFormInstance {
+  validate: () => Promise<any>;
+}
 
 export default defineComponent({
   name: "LoginPage",
   setup() {
+    const loginFormRef = ref() as Ref<RuleFormInstance>;
     const router = useRouter();
     const store = useStore<GlobalDataProps>();
     const counter = ref(60);
-    // let timer = 0;
-    // const loginRef = ref();
-    const isLoginLoading = computed(() => false);
+    const isLoginLoading = computed(() => store.getters.isLoading);
     const form = reactive({
       cellphone: "",
       verifyCode: "",
     });
+    let counterTimer;
 
     const cellnumberValidator = (rule: Rule, value: string) => {
       return new Promise((resolve, reject) => {
@@ -107,77 +124,120 @@ export default defineComponent({
       return !/^1[3-9]\d{9}$/.test(form.cellphone.trim()) || counter.value < 60;
     });
 
+    /** 验证码倒计时*/
+    const startCounter = () => {
+      counter.value--;
+      clearInterval(counterTimer);
+      counterTimer = setInterval(() => {
+        counter.value--;
+      }, 1000);
+    };
+    watch(counter, (newValue) => {
+      if (newValue <= 0) {
+        clearInterval(counterTimer);
+        counter.value = 60;
+      }
+    });
     const getCode = async () => {
       try {
         const result = await UsersService.getVeriCode({
           phoneNumber: form.cellphone,
         });
-        message.success(`你获取的验证码是 ${result.data.veriCode}`);
+        console.log("_getCode", result);
+        if (result.errno === 0) {
+          message.success(
+            `验证码已发送, 请注意查收 ${result.data.veriCode}`,
+            5
+          );
+          startCounter();
+        }
       } catch (error) {
-        console.error("短信验证码获取失败");
+        console.error("短信验证码获取失败", error);
       }
     };
 
     const login = async () => {
-      await store.dispatch("login", form);
-      message.success(`欢迎${store.state.user.data?.nickName}, 登录成功!`);
-      router.push("/");
-    };
+      // 触发表单验证
+      // 1. 使用 useForm 完成表单验证
+      // const { validate } = useForm(form, rules);
+      // validate()
+      //   .then(() => console.log("validate pass"))
+      //   .catch(() => console.log("验证不通过"));
 
-    onMounted(() => {
-      window.addEventListener("message", (m) => {
-        const { type, token } = m.data;
-        if (type === "oauth-token") {
-          axios
-            .get("http://127.0.0.1:7001/api/users/getUserInfo", {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            })
-            .then((resp) => {
-              const data = resp.data.data;
-              store.dispatch("login", {
-                nickName: data.nickName,
-                avatar: data.picture,
-              });
-              message.success(
-                `欢迎${store.state.user.data?.nickName}, 登录成功!`
-              );
-              setTimeout(() => {
-                router.push("/");
-              }, 2000);
-            });
-        }
-      });
-    });
-
-    const handleTest = () => {
-      axios
-        .post(
-          `http://127.0.0.1:7001/api/users/loginByEmail`,
-          {
-            username: "18958849752@163.com",
-            password: "woaiwo1234",
-          },
-          {
-            headers: {
-              "Custom-Param": "test",
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-          }
-        )
-        .then((resp) => {
-          console.log("resp", resp);
+      //  2. 使用元素节点的方法验证表单
+      loginFormRef.value.validate().then(async () => {
+        const payload = {
+          phoneNumber: form.cellphone,
+          veriCode: form.verifyCode,
+        };
+        store.dispatch("loginAndFetchUserInfo", payload).then(() => {
+          message.success(`登录成功 2秒后跳转首页!`);
+          setTimeout(() => {
+            router.push("/");
+          }, 2000);
         });
+      });
     };
 
-    const handleOAthLogin = () => {
-      window.open(
-        `http://127.0.0.1:7001/api/users/passport/gitee`,
-        "_blank",
-        "height=500,width=500,left=0;top=0"
-      );
-    };
+    // onMounted(() => {
+    //   window.addEventListener("message", (m) => {
+    //     const { type, token } = m.data;
+    //     if (type === "oauth-token") {
+    //       axios
+    //         .get("http://127.0.0.1:7001/api/users/getUserInfo", {
+    //           headers: {
+    //             Authorization: `Bearer ${token}`,
+    //           },
+    //         })
+    //         .then((resp) => {
+    //           const data = resp.data.data;
+    //           store.dispatch("login", {
+    //             nickName: data.nickName,
+    //             avatar: data.picture,
+    //           });
+    //           message.success(
+    //             `欢迎${store.state.user.data?.nickName}, 登录成功!`
+    //           );
+    //           setTimeout(() => {
+    //             router.push("/");
+    //           }, 2000);
+    //         });
+    //     }
+    //   });
+    // });
+
+    // const handleTest = () => {
+    //   axios
+    //     .post(
+    //       `http://127.0.0.1:7001/api/users/loginByEmail`,
+    //       {
+    //         username: "18958849752@163.com",
+    //         password: "woaiwo1234",
+    //       },
+    //       {
+    //         headers: {
+    //           "Custom-Param": "test",
+    //           "Content-Type": "application/x-www-form-urlencoded",
+    //         },
+    //       }
+    //     )
+    //     .then((resp) => {
+    //       console.log("resp", resp);
+    //     });
+    // };
+
+    // const handleOAthLogin = () => {
+    //   window.open(
+    //     `http://127.0.0.1:7001/api/users/passport/gitee`,
+    //     "_blank",
+    //     "height=500,width=500,left=0;top=0"
+    //   );
+    // };
+
+    onUnmounted(() => {
+      clearInterval(counterTimer);
+      counter.value = 60;
+    });
 
     return {
       form,
@@ -187,8 +247,9 @@ export default defineComponent({
       codeButtonDisable,
       getCode,
       counter,
-      handleOAthLogin,
-      handleTest,
+      loginFormRef,
+      // handleOAthLogin,
+      // handleTest,
     };
   },
   components: {

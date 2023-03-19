@@ -32,8 +32,9 @@ const templates: Module<TemplatesProps, GlobalDataProps> = {
   },
   actions: {
     fetchTemplates(context) {
-      ApiService.get(`/api/templates?pageSize=8&pageIndex=0`).then((resp) => {
-        console.log("_actions fetchTemplates", resp);
+      ApiService.get(`/api/templates?pageSize=8&pageIndex=0`, {
+        opName: "fetchTemplates",
+      }).then((resp) => {
         context.commit("fetchTemplates", resp);
       });
     },
