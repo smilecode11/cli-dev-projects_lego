@@ -1,5 +1,43 @@
 <template>
   <div class="editor-page">
+    <a-layout>
+      <a-layout-header class="header">
+        <div class="page-title">
+          <router-link to="/">
+            <img
+              alt="慕课乐高"
+              src="../../assets/logo-simple.png"
+              class="logo-img"
+            />
+          </router-link>
+          <inline-edit :value="page.title" @change="titleChange" />
+        </div>
+        <a-menu
+          :selectable="false"
+          theme="dark"
+          mode="horizontal"
+          :style="{ lineHeight: '64px', width: '520px' }"
+        >
+          <a-menu-item key="1">
+            <a-button type="primary">预览和设置</a-button>
+          </a-menu-item>
+          <a-menu-item key="2">
+            <a-button
+              type="primary"
+              :loading="saveWorkLoading"
+              @click="saveWork"
+              >保存</a-button
+            >
+          </a-menu-item>
+          <a-menu-item key="3">
+            <a-button type="primary">发布</a-button>
+          </a-menu-item>
+          <a-menu-item key="4">
+            <user-profile :user="userInfo"></user-profile>>
+          </a-menu-item>
+        </a-menu>
+      </a-layout-header>
+    </a-layout>
     <a-row class="container">
       <a-col :span="6" class="templates-wrap">
         <components-list
@@ -71,12 +109,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref } from "vue";
+import { defineComponent, computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
+import { useRoute } from "vue-router";
 import { GlobalDataProps } from "@/store/index";
 import { ComponentProps } from "@/store/modules/editor";
 import defaultTextTemplates from "@/defaultTemplates";
-import { pickBy, forEach } from "lodash-es";
+import { pickBy } from "lodash-es";
 
 import LText from "@/components/LText.vue";
 import LImage from "@/components/LImage.vue";
@@ -88,7 +127,9 @@ import EditGroups from "@/components/EditGroups.vue";
 import HistoryArea from "./HistoryArea.vue";
 import initHotKeys from "@/plugins/hotKeys";
 import initContextMenu from "@/plugins/contextMenu";
-
+import InlineEdit from "@/components/InlineEdit.vue";
+import UserProfile from "@/layout/header/UserProfile.vue";
+import useSaveWork from "@/hooks/useSaveWork";
 export type TabType = "component" | "layer" | "page";
 
 export default defineComponent({
@@ -96,10 +137,13 @@ export default defineComponent({
   setup() {
     initHotKeys(); //  键盘插件
     initContextMenu(); //  右键菜单插件
-
-    const activePanel = ref<TabType>("component");
+    const route = useRoute();
+    const currentWorkId = route.params.id;
     const store = useStore<GlobalDataProps>();
+    const activePanel = ref<TabType>("component");
     const components = computed(() => store.state.editor.components);
+    const userInfo = computed(() => store.state.user);
+    const { saveWork, saveWorkLoading } = useSaveWork();
 
     const handleItemClick = (component: any) => {
       store.commit("editor/addComponent", component);
@@ -150,14 +194,19 @@ export default defineComponent({
         value: valuesArr,
         id,
       });
-      // forEach(positionData, (value, key) => {
-      //   store.commit("editor/updateComponent", {
-      //     key,
-      //     value: value + "px",
-      //     id,
-      //   });
-      // });
     };
+
+    const titleChange = (title: string) => {
+      store.commit("editor/updatePage", {
+        key: "title",
+        value: title,
+        isRoot: true,
+      });
+    };
+
+    onMounted(() => {
+      store.dispatch("editor/fetchWork", { id: currentWorkId });
+    });
 
     return {
       components,
@@ -170,6 +219,10 @@ export default defineComponent({
       page,
       pageChange,
       updatePosition,
+      userInfo,
+      titleChange,
+      saveWork,
+      saveWorkLoading,
     };
   },
   components: {
@@ -181,6 +234,8 @@ export default defineComponent({
     LayerList,
     EditGroups,
     HistoryArea,
+    InlineEdit,
+    UserProfile,
   },
 });
 </script>
@@ -188,9 +243,12 @@ export default defineComponent({
 <style scoped>
 .editor-page {
   height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
+  width: 100%;
   height: 100%;
 }
 
@@ -225,5 +283,22 @@ export default defineComponent({
 
 .container .attrs-wrap {
   background: aliceblue;
+}
+
+.header {
+  display: flex;
+}
+.page-title {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+.page-title .inline-edit {
+  margin-left: 10px;
+  color: #fff;
+}
+.page-title .inline-edit span {
+  font-weight: 500;
+  font-size: 16px;
 }
 </style>

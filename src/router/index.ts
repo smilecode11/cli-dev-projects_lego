@@ -11,7 +11,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/",
     name: "index",
     component: IndexView,
-    redirect: "home",
+    redirect: "/home",
     children: [
       {
         path: "home",

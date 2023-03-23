@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed } from "vue";
+import { defineComponent, PropType } from "vue";
 import StyledUpload from "@/components/StyledUpload.vue";
 import LText from "@/components/LText.vue";
 import { v4 as uuidV4 } from "uuid";

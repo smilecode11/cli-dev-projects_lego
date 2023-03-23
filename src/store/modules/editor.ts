@@ -4,6 +4,9 @@ import { v4 as uuidv4 } from "uuid";
 import { cloneDeep } from "lodash-es";
 import store, { GlobalDataProps } from "../index";
 import { insertAt } from "@/helper";
+import WorksAPi from "@/axios/works";
+import { RespWorkData } from "../respTypes";
+
 import {
   textDefaultProps,
   AllComponentProps,
@@ -31,6 +34,7 @@ export interface EditorProps {
   historyIndex: number;
   maxHistoryNumber: number;
   cachedOldValues?: any; //  开始更新的缓存值
+  isDirty: boolean; //  自动保存时使用
 }
 
 export type AllFormProps = AllComponentProps & PageProps;
@@ -44,8 +48,11 @@ export interface PageProps {
 }
 
 export interface PageData {
+  id?: string;
   title: string;
   props: PageProps;
+  desc?: string;
+  coverImg?: string;
 }
 
 export interface ComponentProps {
@@ -141,6 +148,14 @@ const pageDefaultProps = {
 
 export type MoveDirection = "Up" | "Down" | "Left" | "Right";
 
+/** 针对 Work  "有变更操作" 记录状态*/
+const setDirtyWrapper = (callback) => {
+  return (state: EditorProps, payload: any) => {
+    state.isDirty = true;
+    callback(state, payload);
+  };
+};
+
 /** 属性变化防抖函数*/
 const debounceChange = (callback: (...args: any) => void, timeout = 1000) => {
   let timer = 0;
@@ -219,7 +234,7 @@ const modifyHistory = (
 const editor: Module<EditorProps, GlobalDataProps> = {
   namespaced: true, //  启动命名空间
   state: {
-    components: testComponents,
+    components: [],
     currentElement: "",
     page: {
       props: pageDefaultProps,
@@ -229,9 +244,10 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     historyIndex: -1,
     maxHistoryNumber: 5,
     cachedOldValues: null,
+    isDirty: false,
   },
   mutations: {
-    addComponent: (state, component: ComponentProps) => {
+    addComponent: setDirtyWrapper((state, component: ComponentProps) => {
       component.layerName = "图层" + (state.components.length + 1);
       state.components.push(component);
 
@@ -241,7 +257,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         type: "add",
         data: cloneDeep(component),
       });
-    },
+    }),
     setActive: (state, id) => {
       state.currentElement = id;
     },
@@ -305,7 +321,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         antdMessage.success("已拷贝当前图层", 1);
       }
     },
-    pasteCopiedComponent: (state) => {
+    pasteCopiedComponent: setDirtyWrapper((state) => {
       if (state.copiedComponent) {
         const newComponent = cloneDeep(state.copiedComponent);
         newComponent.id = uuidv4();
@@ -320,8 +336,8 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           data: cloneDeep(newComponent),
         });
       }
-    },
-    deleteComponent: (state, id) => {
+    }),
+    deleteComponent: setDirtyWrapper((state, id) => {
       const currentComponent = state.components.find(
         (component) => component.id === id
       );
@@ -342,7 +358,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
           data: currentComponent,
         });
       }
-    },
+    }),
     moveComponent: (
       state,
       data: { direction: MoveDirection; amount: number; id: string }
@@ -396,38 +412,62 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         }
       }
     },
-    updateComponent: (
-      state,
-      { key, value, id, isRoot }: updateComponentData
-    ) => {
-      const updateComponent = state.components.find(
-        (component) => component.id === (id || state.currentElement)
-      );
-      if (updateComponent) {
-        if (isRoot) {
-          updateComponent[key as string] = value;
-        } else {
-          //  区分处理传入的 key 和 value 是 array 情况
-          const oldValue = Array.isArray(key)
-            ? key.map((k) => updateComponent.props[k])
-            : updateComponent.props[key];
-          if (!state.cachedOldValues) {
-            state.cachedOldValues = oldValue;
-          }
-          //  添加到历史记录
-          pushHistoryDebounce(state, { key, value, id });
-          if (Array.isArray(key) && Array.isArray(value)) {
-            key.forEach((kName, index) => {
-              updateComponent.props[kName] = value[index];
-            });
-          } else if (typeof key === "string" && typeof value === "string") {
-            updateComponent.props[key] = value;
+    updateComponent: setDirtyWrapper(
+      (state, { key, value, id, isRoot }: updateComponentData) => {
+        const updateComponent = state.components.find(
+          (component) => component.id === (id || state.currentElement)
+        );
+        if (updateComponent) {
+          if (isRoot) {
+            updateComponent[key as string] = value;
+          } else {
+            //  区分处理传入的 key 和 value 是 array 情况
+            const oldValue = Array.isArray(key)
+              ? key.map((k) => updateComponent.props[k])
+              : updateComponent.props[key];
+            if (!state.cachedOldValues) {
+              state.cachedOldValues = oldValue;
+            }
+            //  添加到历史记录
+            pushHistoryDebounce(state, { key, value, id });
+            if (Array.isArray(key) && Array.isArray(value)) {
+              key.forEach((kName, index) => {
+                updateComponent.props[kName] = value[index];
+              });
+            } else if (typeof key === "string" && typeof value === "string") {
+              updateComponent.props[key] = value;
+            }
           }
         }
       }
+    ),
+    updatePage: setDirtyWrapper((state, { key, value, isRoot }) => {
+      if (isRoot) {
+        state.page[key] = value;
+      } else {
+        state.page.props[key as keyof PageProps] = value;
+      }
+    }),
+    fetchWork: (state, { data }: RespWorkData) => {
+      const { content, ...rest } = data;
+      state.page = { ...state.page, ...rest };
+      if (content.props) {
+        state.page.props = content.props;
+      }
+      state.components = content.components;
     },
-    updatePage: (state, { key, value }) => {
-      state.page.props[key as keyof PageProps] = value;
+    saveWork: (state) => {
+      state.isDirty = false;
+    },
+  },
+  actions: {
+    fetchWork: async ({ commit }, { id }) => {
+      const result = await WorksAPi.fetchWork(id);
+      commit("fetchWork", result);
+    },
+    saveWork: async ({ commit }, { id, payload }) => {
+      const result = await WorksAPi.saveWork({ id, data: payload });
+      commit("saveWork", result);
     },
   },
   getters: {

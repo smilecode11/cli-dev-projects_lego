@@ -4,7 +4,6 @@ import axios, {
   AxiosResponse,
   AxiosError,
 } from "axios";
-import { message as antdMessage } from "ant-design-vue";
 import store from "@/store";
 import { RespData } from "@/store/respTypes";
 
@@ -152,6 +151,14 @@ export class Request {
     config?: ICustomAxiosRequestConfig
   ): Promise<RespData<T>> {
     return this.instance.put(url, data, config);
+  }
+
+  patch<T = any>(
+    url: string,
+    data?: any,
+    config?: ICustomAxiosRequestConfig
+  ): Promise<RespData<T>> {
+    return this.instance.patch(url, data, config);
   }
 
   delete<T = any>(
