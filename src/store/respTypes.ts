@@ -10,6 +10,10 @@ export interface ListData<T> {
   count: number;
 }
 
+export interface UploadData {
+  urls: string[];
+}
+
 export interface WorkData extends Omit<PageData, "props"> {
   content: {
     components: ComponentProps[];
@@ -19,3 +23,4 @@ export interface WorkData extends Omit<PageData, "props"> {
 
 export type RespListData<T> = RespData<ListData<T>>;
 export type RespWorkData = RespData<WorkData>;
+export type RespUploadData = RespData<UploadData>;

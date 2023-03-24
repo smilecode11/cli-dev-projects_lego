@@ -30,7 +30,7 @@
             >
           </a-menu-item>
           <a-menu-item key="3">
-            <a-button type="primary">发布</a-button>
+            <a-button type="primary" @click="handlePublish">发布</a-button>
           </a-menu-item>
           <a-menu-item key="4">
             <user-profile :user="userInfo"></user-profile>>
@@ -48,7 +48,11 @@
       </a-col>
       <a-col :span="12" class="editor-wrap">
         <history-area></history-area>
-        <div class="control" id="canvas-area">
+        <div
+          class="control"
+          :class="{ 'canvas-fix': canvasFix }"
+          id="canvas-area"
+        >
           <div class="body-container" :style="page.props">
             <!-- 动态渲染组件 -->
             <edit-wrapper
@@ -109,13 +113,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, onMounted } from "vue";
+import { defineComponent, computed, ref, onMounted, nextTick } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import { GlobalDataProps } from "@/store/index";
 import { ComponentProps } from "@/store/modules/editor";
 import defaultTextTemplates from "@/defaultTemplates";
 import { pickBy } from "lodash-es";
+import html2canvas from "html2canvas";
+import { takeScreenshotAndUpdate } from "@/helper";
 
 import LText from "@/components/LText.vue";
 import LImage from "@/components/LImage.vue";
@@ -208,6 +214,19 @@ export default defineComponent({
       store.dispatch("editor/fetchWork", { id: currentWorkId });
     });
 
+    const canvasFix = ref(false);
+    const handlePublish = async () => {
+      canvasFix.value = true; //  修复 html2canvas 针对 box-shadow 和 max-height 的bug
+      setActive(""); // 重置选中, 修复canvas选中框
+      await nextTick();
+      const el = document.getElementById("canvas-area") as HTMLElement;
+      const resp = await takeScreenshotAndUpdate(el);
+      if (resp) {
+        console.log(resp.data.urls);
+      }
+      canvasFix.value = false;
+    };
+
     return {
       components,
       defaultTextTemplates,
@@ -223,6 +242,8 @@ export default defineComponent({
       titleChange,
       saveWork,
       saveWorkLoading,
+      handlePublish,
+      canvasFix,
     };
   },
   components: {
@@ -278,7 +299,13 @@ export default defineComponent({
   margin-top: 50px;
   max-height: 80vh;
 }
-.control .body-container {
+.control.canvas-fix {
+  position: absolute !important;
+  max-height: none !important;
+}
+
+.control.canvas-fix /deep/ .slot-control * {
+  box-shadow: none !important;
 }
 
 .container .attrs-wrap {

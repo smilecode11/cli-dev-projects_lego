@@ -1,4 +1,7 @@
 import { message } from "ant-design-vue";
+import html2canvas from "html2canvas";
+import axios from "axios";
+import { RespUploadData } from "@/store/respTypes";
 interface CheckCondition {
   format?: string[];
   size?: number; //  使用多少 M 为单位
@@ -66,7 +69,46 @@ export const getParentElement = (element: HTMLElement, className: string) => {
   return null;
 };
 
-// 在数组指定索引位添加数据
+/** 在数组指定索引位添加数据*/
 export const insertAt = (arr: any[], index: number, newItem: any) => {
   return [...arr.slice(0, index), newItem, ...arr.slice(index)];
 };
+
+/** 上传图片到服务器*/
+export async function uploadFile<R = any>(
+  file: Blob,
+  url = "http://127.0.0.1:7001/api/utils/upload-img",
+  fileName = "screenshot.png"
+) {
+  const newFile = file instanceof File ? file : new File([file], fileName);
+  const formData = new FormData();
+  formData.append(newFile.name, newFile);
+  const { data } = await axios.post<R>(url, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  return data;
+}
+function getCanvasBlob(canvas: HTMLCanvasElement) {
+  return new Promise<Blob | null>((resove) => {
+    canvas.toBlob((blob) => {
+      resove(blob);
+    });
+  });
+}
+/** 截取图片并上传*/
+export async function takeScreenshotAndUpdate(ele: HTMLElement) {
+  const canvas = await html2canvas(ele, {
+    width: 375,
+    useCORS: true,
+    scale: 1,
+  });
+  const canvasBlob = await getCanvasBlob(canvas);
+  if (canvasBlob) {
+    //  上传 blob 到服务器
+    const data = await uploadFile<RespUploadData>(canvasBlob);
+    return data;
+  }
+}

@@ -16,6 +16,7 @@ export interface TemplateProps {
 
 export interface TemplatesProps {
   data: TemplateProps[];
+  template: Partial<TemplateProps>;
 }
 
 //  测试数据
@@ -29,6 +30,7 @@ export const testData: TemplateProps[] = [
 const templates: Module<TemplatesProps, GlobalDataProps> = {
   state: {
     data: [],
+    template: {},
   },
   actions: {
     fetchTemplates(context) {
@@ -38,18 +40,26 @@ const templates: Module<TemplatesProps, GlobalDataProps> = {
         context.commit("fetchTemplates", resp);
       });
     },
+    async fetchTemplate({ commit }, { id }) {
+      const result = await ApiService.get(`api/templates/${id}`);
+      commit("fetchTemplate", result.data);
+      return result.data;
+    },
   },
   getters: {
     //  获取模板数据 & id
     getTemplateById:
       (state /* , getters, rootState, rootGetters */) => (id: number) => {
         // rootState.user.data?.nickName;
-        return state.data.find((t) => t.id === id);
+        return state.data.find((t) => t.id === id) || state.template;
       },
   },
   mutations: {
     fetchTemplates: (state, payload: RespListData<TemplateProps>) => {
       state.data = payload.data.list;
+    },
+    fetchTemplate: (state, result) => {
+      state.template = result;
     },
   },
 };
