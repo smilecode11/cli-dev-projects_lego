@@ -72,7 +72,7 @@ export default defineComponent({
 .history-area {
   position: absolute;
   right: 0;
-  z-index: 2000;
+  z-index: 200;
 }
 .operation-list {
   display: flex;

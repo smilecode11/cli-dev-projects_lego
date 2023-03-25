@@ -21,12 +21,18 @@ export interface HistoryProps {
   index?: number;
 }
 
+// export interface ChannelProps {
+//   id: number;
+//   name: string;
+//   workId: number;
+//   status: number;
+// }
+
 export interface ChannelProps {
-  id: number;
+  uuid: string;
   name: string;
-  workId: number;
-  status: number;
 }
+
 export interface EditorProps {
   //    供中间便器渲染的组件
   components: ComponentProps[];
@@ -179,7 +185,7 @@ const setDirtyWrapper = (callback) => {
 
 /** 属性变化防抖函数*/
 const debounceChange = (callback: (...args: any) => void, timeout = 1000) => {
-  let timer = 0;
+  let timer = 0 as any;
   return (...args) => {
     clearTimeout(timer);
     timer = setTimeout(() => {
@@ -488,8 +494,12 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       state.channels = data.list;
     },
     createChannel: (state, { data }: RespData<ChannelProps>) => {
-      console.log("_createChannel", data);
+      // * 以拷贝的方式往数组里插入新数据, 断开数据引用地址
       state.channels = [...state.channels, data];
+    },
+    deleteChannel: (state, { data, id }) => {
+      // console.log("_deleteChannel commit", data);
+      state.channels = state.channels.filter((channel) => channel.uuid !== id);
     },
   },
   actions: {
@@ -512,6 +522,10 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     createChannel: async ({ commit }, { id, name = "默认" }) => {
       const result = await WorksAPi.createChannel({ name, workId: id });
       commit("createChannel", result);
+    },
+    deleteChannel: async ({ commit }, { id }) => {
+      const result = await WorksAPi.deleteChannel({ id });
+      commit("deleteChannel", { ...result, id });
     },
   },
   getters: {

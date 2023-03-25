@@ -2,6 +2,7 @@ import { message } from "ant-design-vue";
 import html2canvas from "html2canvas";
 import axios from "axios";
 import { RespUploadData } from "@/store/respTypes";
+import QRCode from "qrcode";
 interface CheckCondition {
   format?: string[];
   size?: number; //  使用多少 M 为单位
@@ -111,4 +112,10 @@ export async function takeScreenshotAndUpdate(ele: HTMLElement) {
     const data = await uploadFile<RespUploadData>(canvasBlob);
     return data;
   }
+}
+
+/** 生成二维码*/
+export function generateQRCode(id: string, url, width = 100) {
+  const ele = document.getElementById(id) as HTMLCanvasElement;
+  return QRCode.toCanvas(ele, url, { width });
 }

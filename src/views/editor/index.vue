@@ -1,5 +1,13 @@
 <template>
   <div class="editor-page">
+    <a-modal
+      title="发布成功"
+      v-model:visible="showPublishForm"
+      width="700px"
+      :footer="null"
+    >
+      <publish-form />
+    </a-modal>
     <a-layout>
       <a-layout-header class="header">
         <div class="page-title">
@@ -138,6 +146,7 @@ import initHotKeys from "@/plugins/hotKeys";
 import initContextMenu from "@/plugins/contextMenu";
 import InlineEdit from "@/components/InlineEdit.vue";
 import UserProfile from "@/layout/header/UserProfile.vue";
+import PublishForm from "./publishForm.vue";
 import useSaveWork from "@/hooks/useSaveWork";
 import usePublishWork from "@/hooks/usePublishWork";
 export type TabType = "component" | "layer" | "page";
@@ -152,6 +161,7 @@ export default defineComponent({
     const store = useStore<GlobalDataProps>();
     const activePanel = ref<TabType>("component");
     const canvasFix = ref(false);
+    const showPublishForm = ref(false);
     const components = computed(() => store.state.editor.components);
     const userInfo = computed(() => store.state.user);
     const { saveWork, saveWorkLoading } = useSaveWork();
@@ -227,6 +237,7 @@ export default defineComponent({
       await nextTick();
       try {
         await publishWork(el); // 作品发布
+        showPublishForm.value = true;
       } catch (error) {
         console.error(error);
       } finally {
@@ -252,6 +263,7 @@ export default defineComponent({
       handlePublish,
       canvasFix,
       isPublishing,
+      showPublishForm,
     };
   },
   components: {
@@ -265,6 +277,7 @@ export default defineComponent({
     HistoryArea,
     InlineEdit,
     UserProfile,
+    PublishForm,
   },
 });
 </script>

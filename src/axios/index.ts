@@ -11,6 +11,8 @@ export type ICustomAxiosRequestConfig = AxiosRequestConfig & {
   opName?: string;
 };
 
+export const baseH5URL = "http://127.0.0.1:7002";
+
 //  导出 Request , 用来自定义传递配置来创建实例
 export class Request {
   instance: AxiosInstance;

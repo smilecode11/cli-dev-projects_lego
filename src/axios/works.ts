@@ -30,6 +30,11 @@ export class WorksAPi {
       workId,
     });
   }
+
+  /** 删除作品渠道*/
+  deleteChannel({ id }) {
+    return ApiService.delete(`/api/channels/${id}`);
+  }
 }
 
 export default new WorksAPi();

@@ -17,6 +17,7 @@ function usePublishWork() {
   const publishWork = async (el: HTMLElement) => {
     try {
       isPublishing.value = true;
+      //  画布截图并上传
       const resp = await takeScreenshotAndUpdate(el);
       if (resp) {
         //  2. 更新 coverImg
