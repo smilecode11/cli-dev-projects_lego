@@ -5,7 +5,7 @@ import { cloneDeep } from "lodash-es";
 import store, { GlobalDataProps } from "../index";
 import { insertAt } from "@/helper";
 import WorksAPi from "@/axios/works";
-import { RespWorkData } from "../respTypes";
+import { RespWorkData, RespListData, RespData } from "../respTypes";
 
 import {
   textDefaultProps,
@@ -21,6 +21,12 @@ export interface HistoryProps {
   index?: number;
 }
 
+export interface ChannelProps {
+  id: number;
+  name: string;
+  workId: number;
+  status: number;
+}
 export interface EditorProps {
   //    供中间便器渲染的组件
   components: ComponentProps[];
@@ -35,6 +41,7 @@ export interface EditorProps {
   maxHistoryNumber: number;
   cachedOldValues?: any; //  开始更新的缓存值
   isDirty: boolean; //  自动保存时使用
+  channels: ChannelProps[]; //  存储当前 work 的 channels
 }
 
 export type AllFormProps = AllComponentProps & PageProps;
@@ -48,11 +55,25 @@ export interface PageProps {
 }
 
 export interface PageData {
-  id?: string;
-  title: string;
-  props: PageProps;
+  id?: number;
+  props?: PageProps;
+  title?: string;
   desc?: string;
   coverImg?: string;
+  uuid?: string;
+  setting?: { [key: string]: any };
+  isTemplate?: boolean;
+  isHot?: boolean;
+  isNew?: boolean;
+  author?: string;
+  copiedCount?: number;
+  status?: number;
+  user?: {
+    gender: string;
+    nickName: string;
+    picture: string;
+    userName: string;
+  };
 }
 
 export interface ComponentProps {
@@ -245,6 +266,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     maxHistoryNumber: 5,
     cachedOldValues: null,
     isDirty: false,
+    channels: [],
   },
   mutations: {
     addComponent: setDirtyWrapper((state, component: ComponentProps) => {
@@ -459,6 +481,16 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     saveWork: (state) => {
       state.isDirty = false;
     },
+    publishWork: (state, { data }) => {
+      console.log("_publishWork", data);
+    },
+    fetchChannels: (state, { data }: RespListData<ChannelProps>) => {
+      state.channels = data.list;
+    },
+    createChannel: (state, { data }: RespData<ChannelProps>) => {
+      console.log("_createChannel", data);
+      state.channels = [...state.channels, data];
+    },
   },
   actions: {
     fetchWork: async ({ commit }, { id }) => {
@@ -468,6 +500,18 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     saveWork: async ({ commit }, { id, payload }) => {
       const result = await WorksAPi.saveWork({ id, data: payload });
       commit("saveWork", result);
+    },
+    publishWork: async ({ commit }, { id }) => {
+      const result = await WorksAPi.publishWork({ id });
+      commit("publishWork", result);
+    },
+    fetchChannels: async ({ commit }, { id }) => {
+      const result = await WorksAPi.fetchChannels({ id });
+      commit("fetchChannels", result);
+    },
+    createChannel: async ({ commit }, { id, name = "默认" }) => {
+      const result = await WorksAPi.createChannel({ name, workId: id });
+      commit("createChannel", result);
     },
   },
   getters: {

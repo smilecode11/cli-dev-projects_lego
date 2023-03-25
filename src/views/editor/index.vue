@@ -30,7 +30,12 @@
             >
           </a-menu-item>
           <a-menu-item key="3">
-            <a-button type="primary" @click="handlePublish">发布</a-button>
+            <a-button
+              type="primary"
+              @click="handlePublish"
+              :loading="isPublishing"
+              >发布</a-button
+            >
           </a-menu-item>
           <a-menu-item key="4">
             <user-profile :user="userInfo"></user-profile>>
@@ -120,8 +125,6 @@ import { GlobalDataProps } from "@/store/index";
 import { ComponentProps } from "@/store/modules/editor";
 import defaultTextTemplates from "@/defaultTemplates";
 import { pickBy } from "lodash-es";
-import html2canvas from "html2canvas";
-import { takeScreenshotAndUpdate } from "@/helper";
 
 import LText from "@/components/LText.vue";
 import LImage from "@/components/LImage.vue";
@@ -136,6 +139,7 @@ import initContextMenu from "@/plugins/contextMenu";
 import InlineEdit from "@/components/InlineEdit.vue";
 import UserProfile from "@/layout/header/UserProfile.vue";
 import useSaveWork from "@/hooks/useSaveWork";
+import usePublishWork from "@/hooks/usePublishWork";
 export type TabType = "component" | "layer" | "page";
 
 export default defineComponent({
@@ -147,9 +151,11 @@ export default defineComponent({
     const currentWorkId = route.params.id;
     const store = useStore<GlobalDataProps>();
     const activePanel = ref<TabType>("component");
+    const canvasFix = ref(false);
     const components = computed(() => store.state.editor.components);
     const userInfo = computed(() => store.state.user);
     const { saveWork, saveWorkLoading } = useSaveWork();
+    const { publishWork, isPublishing } = usePublishWork();
 
     const handleItemClick = (component: any) => {
       store.commit("editor/addComponent", component);
@@ -214,17 +220,18 @@ export default defineComponent({
       store.dispatch("editor/fetchWork", { id: currentWorkId });
     });
 
-    const canvasFix = ref(false);
     const handlePublish = async () => {
-      canvasFix.value = true; //  修复 html2canvas 针对 box-shadow 和 max-height 的bug
       setActive(""); // 重置选中, 修复canvas选中框
-      await nextTick();
       const el = document.getElementById("canvas-area") as HTMLElement;
-      const resp = await takeScreenshotAndUpdate(el);
-      if (resp) {
-        console.log(resp.data.urls);
+      canvasFix.value = true; //  修复 html2canvas 针对 box-shadow 和 max-height 的bug
+      await nextTick();
+      try {
+        await publishWork(el); // 作品发布
+      } catch (error) {
+        console.error(error);
+      } finally {
+        canvasFix.value = false;
       }
-      canvasFix.value = false;
     };
 
     return {
@@ -244,6 +251,7 @@ export default defineComponent({
       saveWorkLoading,
       handlePublish,
       canvasFix,
+      isPublishing,
     };
   },
   components: {

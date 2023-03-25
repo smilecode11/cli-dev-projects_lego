@@ -12,6 +12,24 @@ export class WorksAPi {
       opName: "saveWork",
     });
   }
+
+  /** 发布作品*/
+  publishWork({ id }) {
+    return ApiService.post(`/api/publish/${id}`);
+  }
+
+  /** 获取作品的 channels*/
+  fetchChannels({ id }) {
+    return ApiService.get(`/api/channels/getWorkChannels/${id}`);
+  }
+
+  /** 创建作品的渠道*/
+  createChannel({ name, workId }) {
+    return ApiService.post(`/api/channels`, {
+      name,
+      workId,
+    });
+  }
 }
 
 export default new WorksAPi();
