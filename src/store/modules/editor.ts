@@ -266,6 +266,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     page: {
       props: pageDefaultProps,
       title: "test title",
+      setting: {},
     },
     histories: [],
     historyIndex: -1,
@@ -469,9 +470,14 @@ const editor: Module<EditorProps, GlobalDataProps> = {
         }
       }
     ),
-    updatePage: setDirtyWrapper((state, { key, value, isRoot }) => {
+    updatePage: setDirtyWrapper((state, { key, value, isRoot, isSetting }) => {
       if (isRoot) {
         state.page[key] = value;
+      } else if (isSetting) {
+        state.page.setting = {
+          ...state.page.setting,
+          [key]: value,
+        };
       } else {
         state.page.props[key as keyof PageProps] = value;
       }
@@ -481,6 +487,9 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       state.page = { ...state.page, ...rest };
       if (content.props) {
         state.page.props = content.props;
+      }
+      if (content.setting) {
+        state.page.setting = content.setting;
       }
       state.components = content.components;
     },

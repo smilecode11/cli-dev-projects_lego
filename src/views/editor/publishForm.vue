@@ -90,11 +90,11 @@
 import { defineComponent, reactive, computed, onMounted, watch } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
-import { Form } from "ant-design-vue";
+import { Form, message as AntdMessage } from "ant-design-vue";
 import { GlobalDataProps } from "@/store";
 import { baseH5URL } from "@/axios";
-import QRCode from "qrcode";
 import { last } from "lodash-es";
+import Clipboard from "clipboard";
 import { generateQRCode } from "@/helper";
 const useForm = Form.useForm;
 export default defineComponent({
@@ -140,24 +140,25 @@ export default defineComponent({
         id: uuid,
       });
     };
-    //  生成二维码
     onMounted(() => {
+      //  剪切实例化
+      const clipboard = new Clipboard(".copy-button");
+      clipboard.on("success", (e) => {
+        AntdMessage.success("复制成功", 1);
+        e.clearSelection(); //  清除选中
+      });
+
+      //  生成二维码
       channels.value.forEach(async (channel) => {
         await generateQRCode(
           `channel-barcode-${channel.uuid}`,
           generateChannelURL(channel.uuid)
         );
-        // const ele = document.getElementById(
-        //   `channel-barcode-${channel.uuid}`
-        // ) as HTMLCanvasElement;
-        // await QRCode.toCanvas(ele, generateChannelURL(channel.uuid), {
-        //   width: 100,
-        // });
       });
     });
 
     watch(
-      channels,
+      () => [...channels.value],
       async (newChannels, oldChannels) => {
         if (newChannels.length > oldChannels.length) {
           const createChannel = last(newChannels);

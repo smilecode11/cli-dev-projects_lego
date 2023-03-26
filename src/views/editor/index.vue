@@ -8,6 +8,12 @@
     >
       <publish-form />
     </a-modal>
+    <!-- 
+       -->
+    <preview-form
+      v-if="showPreviewForm"
+      v-model:visible="showPreviewForm"
+    ></preview-form>
     <a-layout>
       <a-layout-header class="header">
         <div class="page-title">
@@ -20,35 +26,19 @@
           </router-link>
           <inline-edit :value="page.title" @change="titleChange" />
         </div>
-        <a-menu
-          :selectable="false"
-          theme="dark"
-          mode="horizontal"
-          :style="{ lineHeight: '64px', width: '520px' }"
-        >
-          <a-menu-item key="1">
-            <a-button type="primary">预览和设置</a-button>
-          </a-menu-item>
-          <a-menu-item key="2">
-            <a-button
-              type="primary"
-              :loading="saveWorkLoading"
-              @click="saveWork"
-              >保存</a-button
-            >
-          </a-menu-item>
-          <a-menu-item key="3">
-            <a-button
-              type="primary"
-              @click="handlePublish"
-              :loading="isPublishing"
-              >发布</a-button
-            >
-          </a-menu-item>
-          <a-menu-item key="4">
-            <user-profile :user="userInfo"></user-profile>>
-          </a-menu-item>
-        </a-menu>
+        <div class="page-opera">
+          <a-button type="primary" @click="handlePreview">预览和设置</a-button>
+          <a-button type="primary" :loading="saveWorkLoading" @click="saveWork"
+            >保存</a-button
+          >
+          <a-button
+            type="primary"
+            @click="handlePublish"
+            :loading="isPublishing"
+            >发布</a-button
+          >
+          <user-profile :user="userInfo"></user-profile>
+        </div>
       </a-layout-header>
     </a-layout>
     <a-row class="container">
@@ -147,6 +137,7 @@ import initContextMenu from "@/plugins/contextMenu";
 import InlineEdit from "@/components/InlineEdit.vue";
 import UserProfile from "@/layout/header/UserProfile.vue";
 import PublishForm from "./publishForm.vue";
+import PreviewForm from "./PreviewForm.vue";
 import useSaveWork from "@/hooks/useSaveWork";
 import usePublishWork from "@/hooks/usePublishWork";
 export type TabType = "component" | "layer" | "page";
@@ -162,6 +153,7 @@ export default defineComponent({
     const activePanel = ref<TabType>("component");
     const canvasFix = ref(false);
     const showPublishForm = ref(false);
+    const showPreviewForm = ref(false);
     const components = computed(() => store.state.editor.components);
     const userInfo = computed(() => store.state.user);
     const { saveWork, saveWorkLoading } = useSaveWork();
@@ -245,6 +237,10 @@ export default defineComponent({
       }
     };
 
+    const handlePreview = async () => {
+      showPreviewForm.value = true;
+    };
+
     return {
       components,
       defaultTextTemplates,
@@ -264,6 +260,8 @@ export default defineComponent({
       canvasFix,
       isPublishing,
       showPublishForm,
+      showPreviewForm,
+      handlePreview,
     };
   },
   components: {
@@ -278,6 +276,7 @@ export default defineComponent({
     InlineEdit,
     UserProfile,
     PublishForm,
+    PreviewForm,
   },
 });
 </script>
@@ -348,5 +347,13 @@ export default defineComponent({
 .page-title .inline-edit span {
   font-weight: 500;
   font-size: 16px;
+}
+
+.page-opera {
+  display: flex;
+  align-items: center;
+}
+.page-opera > * {
+  margin-right: 24px;
 }
 </style>

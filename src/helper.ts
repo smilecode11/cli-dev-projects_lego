@@ -119,3 +119,31 @@ export function generateQRCode(id: string, url, width = 100) {
   const ele = document.getElementById(id) as HTMLCanvasElement;
   return QRCode.toCanvas(ele, url, { width });
 }
+
+/** 拷贝到剪贴板*/
+export function copyToClipboard(text: string) {
+  // 创建文本域节点, 设置需要拷贝的值
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  // 设置该节点不可见
+  textarea.style.position = "fixed";
+  textarea.style.top = "0";
+  textarea.style.left = "-99999px";
+  // 将节点插入到 body, 并使其选中内容
+  document.body.appendChild(textarea);
+  textarea.select();
+  // 使用 document.execCommand 完成拷贝命令
+  try {
+    document.execCommand("copy");
+  } catch (error) {
+    console.error("copy failed", error);
+  } finally {
+    // 删除节点
+    document.body.removeChild(textarea);
+  }
+}
+
+/** 睡眠函数*/
+export function timeout(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

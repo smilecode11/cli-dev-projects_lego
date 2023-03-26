@@ -18,6 +18,7 @@ export interface WorkData extends Omit<PageData, "props"> {
   content: {
     components: ComponentProps[];
     props?: PageProps;
+    setting?: any;
   };
 }
 

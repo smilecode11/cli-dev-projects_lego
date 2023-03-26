@@ -15,12 +15,15 @@ const useSaveWork = (disableCondition = false) => {
   const saveWorkLoading = computed(() => store.getters.isOpLoading("saveWork"));
   //  保存
   const saveWork = () => {
-    const { title, props } = page.value;
+    const { title, props, desc, coverImg, setting } = page.value;
     const payload = {
       title,
+      desc,
+      coverImg,
       content: {
         components: components.value,
         props,
+        setting,
       },
     };
     store.dispatch("editor/saveWork", { id: currentWorkId, payload });

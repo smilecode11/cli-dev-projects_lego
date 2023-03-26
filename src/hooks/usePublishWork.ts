@@ -21,7 +21,7 @@ function usePublishWork() {
       const resp = await takeScreenshotAndUpdate(el);
       if (resp) {
         //  2. 更新 coverImg
-        store.dispatch("editor/updatePage", {
+        store.commit("editor/updatePage", {
           key: "coverImg",
           value: resp.data.urls[0],
           isRoot: true,

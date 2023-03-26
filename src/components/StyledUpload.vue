@@ -2,7 +2,7 @@
   <div class="styled-upload">
     <upload-file
       class="styled-uploader"
-      action="http://127.0.0.1:7001/api/upload-img"
+      :action="action"
       :show-upload-list="false"
       :before-upload="commonUploadCheck"
       @success="handleUploadSuccess"
@@ -17,10 +17,13 @@
           <h4>上传中</h4>
         </div>
       </template>
-      <template #uploaded>
+      <template #uploaded="dataProps">
         <div class="uploader-container">
-          <FileImageOutlined />
-          <h4>上传图片</h4>
+          <img :src="dataProps.uploadedData.data.urls[0]" v-if="showUploaded" />
+          <template v-else>
+            <FileImageOutlined />
+            <h4>上传图片</h4>
+          </template>
         </div>
       </template>
     </upload-file>
@@ -33,6 +36,16 @@ import { FileImageOutlined, LoadingOutlined } from "@ant-design/icons-vue";
 import UploadFile from "@/components/UploadFile.vue";
 import { commonUploadCheck } from "@/helper";
 export default defineComponent({
+  props: {
+    showUploaded: {
+      type: Boolean,
+      default: false,
+    },
+    action: {
+      type: String,
+      default: "http://127.0.0.1:7001/api/upload-img",
+    },
+  },
   emits: ["success"],
   setup(props, context) {
     const handleUploadSuccess = ({ resp, file }: { resp: any; file: File }) => {
@@ -87,5 +100,11 @@ export default defineComponent({
 
 .uploader-container > span {
   margin-right: 4px;
+}
+
+.uploader-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 </style>
