@@ -5,7 +5,6 @@ interface LoadParams {
   pageIndex: number;
   pageSize: number;
   [key: string]: any;
-  loadMore?: boolean;
 }
 
 const useLoadMore = (
@@ -18,16 +17,19 @@ const useLoadMore = (
   // 请求的参数: 根据变化的参数进行更新
   const requestParams = reactive(params);
 
+  //  加载更多
   const loadMorePage = () => {
     requestParams.pageIndex++;
-    store.dispatch(actionName, { searchParams: requestParams, loadMore: true });
+    store.dispatch(actionName, { searchParams: requestParams, loadMore: true }); //  加载更多, 添加 loadMore 参数
   };
 
+  //  加载上一页
   const loadPrevPage = () => {
     requestParams.pageIndex--;
     store.dispatch(actionName, { searchParams: requestParams });
   };
 
+  //  加载指定页面
   const goToPage = (index: number) => {
     requestParams.pageIndex = index;
     store.dispatch(actionName, { searchParams: requestParams });
@@ -51,6 +53,7 @@ const useLoadMore = (
     isLastPage,
     pageIndex,
     totalPage,
+    requestParams,
   };
 };
 

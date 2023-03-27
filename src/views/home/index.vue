@@ -18,7 +18,12 @@
           <TemplateList :list="testData" />
         </a-col>
         <a-col>
-          <a-button type="primary" v-if="!isLastPage" @click="loadMorePage">
+          <a-button
+            type="primary"
+            :loading="isLoading"
+            v-if="!isLastPage"
+            @click="loadMorePage"
+          >
             加载更多
           </a-button>
         </a-col>
@@ -75,14 +80,14 @@ export default defineComponent({
       });
 
       // 使用 loadMorePage 非常容易就实现了一个下拉加载
-      window.addEventListener("scroll", (e) => {
-        const totalPageHeight = document.body.scrollHeight;
-        const scrollPoint = window.scrollY + window.innerHeight;
-        if (scrollPoint >= totalPageHeight && !isLastPage.value) {
-          console.log("at the bottom");
-          loadMorePage();
-        }
-      });
+      // window.addEventListener("scroll", (e) => {
+      //   const totalPageHeight = document.body.scrollHeight;
+      //   const scrollPoint = window.scrollY + window.innerHeight;
+      //   if (scrollPoint >= totalPageHeight && !isLastPage.value) {
+      //     console.log("at the bottom");
+      //     loadMorePage();
+      //   }
+      // });
     });
     return {
       testData,

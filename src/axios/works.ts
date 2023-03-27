@@ -1,7 +1,30 @@
 import ApiService from "./index";
+import { objectToQueryString } from "@/helper";
 
 export class WorksAPi {
-  /** 获取单个作品数据*/
+  /** 获取我的作品/模板*/
+  fetchWorks({ searchParams }) {
+    let url = `/api/works`;
+    if (searchParams && Object.keys(searchParams).length) {
+      url += `?${objectToQueryString(searchParams)}`;
+    }
+    return ApiService.get(url, {
+      opName: "fetchWorks",
+    });
+  }
+
+  /** 获取模板列表*/
+  fetchTemplates({ searchParams }) {
+    let url = `/api/templates`;
+    if (searchParams && Object.keys(searchParams).length) {
+      url += `?${objectToQueryString(searchParams)}`;
+    }
+    return ApiService.get(url, {
+      opName: "fetchTemplates",
+    });
+  }
+
+  /** 获取单个作品*/
   fetchWork(id: string) {
     return ApiService.get(`/api/works/${id}`, { opName: "fetchWork" });
   }

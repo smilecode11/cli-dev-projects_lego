@@ -1,41 +1,28 @@
 import { ActionContext, Module } from "vuex";
 import { GlobalDataProps } from "../index";
 import ApiService from "@/axios/index";
-import axios, { AxiosRequestConfig } from "axios";
+import WorkApi from "@/axios/works";
 import { RespListData, RespData } from "@/store/respTypes";
 import { PageData } from "./editor";
-import { objectToQueryString } from "@/helper";
 
 export interface ActionPayload {
   urlParams?: { [key: string]: any };
   searchParams?: { [key: string]: any };
   data?: any;
+  loadMore?: boolean;
 }
+
+/** 高阶函数: action 封装*/
 //第二步，确定参数
-export function actionWrapper(
-  url: string,
-  commitName: string,
-  config: AxiosRequestConfig = { method: "get" }
-) {
+export function actionWrapper(ServiceName: any, commitName: string) {
   // 第一步 不管三七二十一，先返回一个函数和原来的函数处理一摸一样
   return async (
     context: ActionContext<any, any>,
     payload: ActionPayload = {}
   ) => {
     //第三部 写内部重复的逻辑
-    const { /* urlParams, */ data, searchParams } = payload;
-    const newConfig = { ...config, data, opName: commitName };
-    let newURL = url;
-    // if (urlParams) {
-    //   const toPath = compile(url, { encode: encodeURIComponent })
-    //   newURL = toPath(urlParams)
-    //   console.log(newURL)
-    // }
-    if (searchParams) {
-      newURL += "?" + objectToQueryString(searchParams);
-    }
-    const resp = await axios(newURL, newConfig);
-    context.commit(commitName, { payload, ...resp.data });
+    const resp = await ServiceName[commitName](payload);
+    context.commit(commitName, { payload, ...resp });
     return resp.data;
   };
 }
@@ -45,6 +32,8 @@ export type TemplateProps = Required<Omit<PageData, "props" | "setting">>;
 export interface TemplatesProps {
   data: TemplateProps[];
   totalTemplates: number;
+  works: TemplateProps[];
+  totalWorks: number;
 }
 
 //  测试数据
@@ -54,23 +43,15 @@ const templates: Module<TemplatesProps, GlobalDataProps> = {
   state: {
     data: [],
     totalTemplates: 0,
+    works: [],
+    totalWorks: 0,
   },
   actions: {
-    async fetchTemplates(context, { searchParams, loadMore = false }) {
-      let url = "/api/templates";
-      let queryString = "";
-      if (searchParams) {
-        queryString = objectToQueryString(searchParams);
-        url = url + "?" + queryString;
-      }
-      const result = await ApiService.get(`${url}`, {
-        opName: "fetchTemplates",
-      });
-      if (loadMore) {
-        context.commit("fetchMoreTemplates", result);
-      } else {
-        context.commit("fetchTemplates", result);
-      }
+    fetchWorks: actionWrapper(WorkApi, "fetchWorks"), //  获取我的作品
+    async fetchTemplates(context, { searchParams = {}, loadMore = false }) {
+      const result = await WorkApi.fetchTemplates({ searchParams });
+      context.commit("fetchTemplates", { ...result, loadMore });
+      return result.data;
     },
     async fetchTemplate({ commit }, { id }) {
       const result = await ApiService.get(`api/templates/${id}`);
@@ -86,15 +67,31 @@ const templates: Module<TemplatesProps, GlobalDataProps> = {
       },
   },
   mutations: {
-    fetchTemplates: (state, rawData: RespListData<TemplateProps>) => {
-      const { list, count } = rawData.data;
-      state.data = list;
+    fetchTemplates: (
+      state,
+      rawData: RespListData<TemplateProps> & { loadMore: boolean }
+    ) => {
+      const { loadMore, data } = rawData;
+      const { list, count } = data;
       state.totalTemplates = count;
+      if (!loadMore) {
+        state.data = list;
+      } else {
+        state.data = [...state.data, ...list];
+      }
     },
-    fetchMoreTemplates: (state, rawData: RespListData<TemplateProps>) => {
-      const { list, count } = rawData.data;
-      state.data = [...state.data, ...list];
-      state.totalTemplates = count;
+    fetchWorks: (
+      state,
+      rawData: RespListData<TemplateProps> & { loadMore: boolean }
+    ) => {
+      const { loadMore, data } = rawData;
+      const { list, count } = data;
+      state.totalWorks = count;
+      if (!loadMore) {
+        state.works = list;
+      } else {
+        state.works = [...state.works, ...list];
+      }
     },
     fetchTemplate: (state, rawData: RespData<TemplateProps>) => {
       state.data = [rawData.data];
