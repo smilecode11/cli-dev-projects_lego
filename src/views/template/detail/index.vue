@@ -4,7 +4,9 @@
     <div id="canvas-source">
       {{ template.id }} - {{ template.title }} - {{ template.author }}
     </div>
-    <a-button @click="goEditor">编辑</a-button>
+    <router-link :to="{ name: 'EditorPage', params: { id: template.id } }">
+      <a-button>编辑</a-button>
+    </router-link>
     <Hello msg="hello" />
     <PickerColor @change="handlePickerChange" :value="pickColor" />
     <UploadTest />
@@ -64,11 +66,6 @@ export default defineComponent({
     const template = computed<TemplateProps>(() =>
       store.getters.getTemplateById(parseInt(currentId))
     );
-    onMounted(async () => {
-      if (currentId) {
-        await store.dispatch("fetchTemplate", { id: currentId });
-      }
-    });
 
     const goEditor = () => {
       router.push(`/editor/${currentId}`);
@@ -122,6 +119,10 @@ export default defineComponent({
         }
       });
     };
+
+    onMounted(() => {
+      console.log("onMounted template-deatil");
+    });
 
     return {
       uploadRef,

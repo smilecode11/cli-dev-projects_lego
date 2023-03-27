@@ -147,3 +147,10 @@ export function copyToClipboard(text: string) {
 export function timeout(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+/** objectToQueryString*/
+export function objectToQueryString(obj: { [key: string]: any }) {
+  return Object.keys(obj)
+    .map((key) => `${key}=${obj[key]}`)
+    .join("&");
+}

@@ -13,18 +13,28 @@
 
     <!-- 模板列表 -->
     <section>
-      <h1 v-if="isLoading">templates is Loading!</h1>
-      <TemplateList :list="testData" />
+      <a-row>
+        <a-col>
+          <TemplateList :list="testData" />
+        </a-col>
+        <a-col>
+          <a-button type="primary" v-if="!isLastPage" @click="loadMorePage">
+            加载更多
+          </a-button>
+        </a-col>
+      </a-row>
+      <a-row> </a-row>
     </section>
   </div>
 </template>
-
 <script lang="ts">
 import { defineComponent, computed, reactive, onMounted, watch } from "vue";
 import { useStore } from "vuex";
 import { GlobalDataProps } from "@/store/index";
+
 import TemplateList from "@/components/TemplateList.vue";
 import { message as antdMessage } from "ant-design-vue";
+import userLoadMore from "@/hooks/useLoadMore";
 
 interface ParamsProps {
   keyword?: string;
@@ -53,19 +63,35 @@ export default defineComponent({
       }
     );
     const testData = computed(() => store.state.templates.data);
+    const total = computed(() => store.state.templates.totalTemplates);
+    const { loadMorePage, isLastPage } = userLoadMore("fetchTemplates", total, {
+      pageIndex: 0,
+      pageSize: 4,
+    });
     onMounted(() => {
       //  获取模板列表
-      store.dispatch("fetchTemplates");
+      store.dispatch("fetchTemplates", {
+        searchParams: { pageIndex: 0, pageSize: 4 },
+      });
 
-      // 登录状态持久化
-      // if (!store.state.user.isLogin && localStorage.getItem("token")) {
-      //   store.dispatch("fetchCurrentUser").catch(() => {
-      //     antdMessage.error("登录验证失败, 请重新登录");
-      //     localStorage.removeItem("token"); //  清除 token
-      //   });
-      // }
+      // 使用 loadMorePage 非常容易就实现了一个下拉加载
+      window.addEventListener("scroll", (e) => {
+        const totalPageHeight = document.body.scrollHeight;
+        const scrollPoint = window.scrollY + window.innerHeight;
+        if (scrollPoint >= totalPageHeight && !isLastPage.value) {
+          console.log("at the bottom");
+          loadMorePage();
+        }
+      });
     });
-    return { testData, searchParams, onSearchTemplates, isLoading };
+    return {
+      testData,
+      searchParams,
+      onSearchTemplates,
+      isLoading,
+      loadMorePage,
+      isLastPage,
+    };
   },
   components: {
     TemplateList,

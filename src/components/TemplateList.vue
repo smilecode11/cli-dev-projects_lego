@@ -2,7 +2,9 @@
   <div class="template-list-component">
     <a-row :gutter="16">
       <a-col :span="6" v-for="item in list" :key="item.id" class="poster-item">
-        <router-link :to="{ name: 'template-detail', params: { id: item.id } }">
+        <router-link
+          :to="{ name: 'TemplateDetailPage', params: { id: item.id } }"
+        >
           <a-card hoverable>
             <template #cover>
               <img :src="item.coverImg" v-if="item.coverImg" />

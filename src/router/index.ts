@@ -2,28 +2,30 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import IndexView from "../layout/index.vue";
 import HomeView from "../views/home/index.vue";
 import LoginView from "../views/login/index.vue";
+import EditorView from "../views/editor/index.vue";
 import TemplateView from "../views/template/index.vue";
+import TemplateDetailView from "../views/template/detail/index.vue";
 import store from "@/store";
 import { message } from "ant-design-vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    name: "index",
+    name: "IndexPage",
     component: IndexView,
     redirect: "/home",
     children: [
       {
         path: "home",
-        name: "home",
+        name: "HomePage",
         component: HomeView,
-        meta: { title: "欢迎到来!" },
+        meta: { title: "欢迎到来!", keepAlive: true },
       },
       {
         path: "template-detail/:id",
-        name: "template-detail",
-        component: () => import("../views/template/detail/index.vue"),
-        meta: { title: "模版详情" },
+        name: "TemplateDetailPage",
+        component: TemplateDetailView,
+        meta: { title: "模版详情", keepAlive: true },
       },
     ],
   },
@@ -34,14 +36,14 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/editor/:id",
-    name: "editor",
+    name: "EditorPage",
     meta: {
       withoutFooter: true,
       withoutHeader: true,
       requiredLogin: true,
       title: "编辑我的设计",
     },
-    component: () => import("../views/editor/index.vue"),
+    component: EditorView,
   },
   {
     path: "/setting",
@@ -54,10 +56,11 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/works",
-    name: "works",
+    name: "WorksPage",
     meta: {
       requiredLogin: true,
       title: "我的模板",
+      keepAlive: true,
     },
     component: () => import("../views/works/index.vue"),
   },

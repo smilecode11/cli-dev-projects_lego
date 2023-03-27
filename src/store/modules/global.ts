@@ -7,6 +7,7 @@ export interface GlobalStatus {
     status: boolean;
     message?: string;
   };
+  keepAliveList: string[];
 }
 
 const global: Module<GlobalStatus, GlobalDataProps> = {
@@ -14,6 +15,7 @@ const global: Module<GlobalStatus, GlobalDataProps> = {
     opNames: {},
     requestNumber: 0,
     error: { status: false },
+    keepAliveList: ["HomePage", "TemplateDetailPage", "WorksPage"],
   },
   mutations: {
     startLoading: (state, payload = {}) => {

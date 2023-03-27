@@ -1,7 +1,7 @@
 <template>
   <header>
     <h1>
-      <router-link to="/">
+      <router-link to="/home">
         <img
           src="@/assets/logo2.png"
           alt="慕課樂高"
