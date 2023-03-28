@@ -39,7 +39,7 @@ import { GlobalDataProps } from "@/store/index";
 
 import TemplateList from "@/components/TemplateList.vue";
 import { message as antdMessage } from "ant-design-vue";
-import userLoadMore from "@/hooks/useLoadMore";
+import useLoadMore from "@/hooks/useLoadMore";
 
 interface ParamsProps {
   keyword?: string;
@@ -69,7 +69,7 @@ export default defineComponent({
     );
     const testData = computed(() => store.state.templates.data);
     const total = computed(() => store.state.templates.totalTemplates);
-    const { loadMorePage, isLastPage } = userLoadMore("fetchTemplates", total, {
+    const { loadMorePage, isLastPage } = useLoadMore("fetchTemplates", total, {
       pageIndex: 0,
       pageSize: 4,
     });

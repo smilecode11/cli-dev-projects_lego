@@ -1,6 +1,9 @@
 <template>
-  <div class="about">
-    <h1>This is an template detail page</h1>
+  <div class="template-detail-container">
+    <!-- 详情页  -->
+    <template-index></template-index>
+    <!-- 组件测试 -->
+    <hr />
     <div id="canvas-source">
       {{ template.id }} - {{ template.title }} - {{ template.author }}
     </div>
@@ -54,6 +57,7 @@ import UploadTest from "@/components/UploadTest.vue";
 import UploadFile from "@/components/UploadFile.vue";
 import CropperDemo from "./CropperDemo.vue";
 import MouseDemo from "./MouseDemo.vue";
+import TemplateIndex from "./TemplateIndex.vue";
 
 export default defineComponent({
   name: "TemplateDetailPage",
@@ -121,7 +125,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      console.log("onMounted template-deatil");
+      //
     });
 
     return {
@@ -144,6 +148,7 @@ export default defineComponent({
     UploadFile,
     CropperDemo,
     MouseDemo,
+    TemplateIndex,
   },
 });
 </script>

@@ -3,6 +3,8 @@ import html2canvas from "html2canvas";
 import axios from "axios";
 import { RespUploadData } from "@/store/respTypes";
 import QRCode from "qrcode";
+import FileSaver from "file-saver";
+import { lastIndexOf } from "lodash-es";
 interface CheckCondition {
   format?: string[];
   size?: number; //  使用多少 M 为单位
@@ -153,4 +155,47 @@ export function objectToQueryString(obj: { [key: string]: any }) {
   return Object.keys(obj)
     .map((key) => `${key}=${obj[key]}`)
     .join("&");
+}
+
+/** 资源文件下载*/
+export function downloadFile(src: string, fileName = "default.png") {
+  //  创建链接
+  const link = document.createElement("a");
+  link.download = fileName;
+  link.rel = "noopener";
+  if (link.origin !== location.origin) {
+    //  非同源资源
+    axios
+      .get(src, {
+        responseType: "blob",
+      })
+      .then((res) => {
+        // 转化为本地资源
+        link.href = URL.createObjectURL(res.data);
+        setTimeout(() => {
+          link.dispatchEvent(new MouseEvent("click"));
+        });
+        //  清除资源消耗
+        setTimeout(() => {
+          URL.revokeObjectURL(link.href);
+        }, 10 * 1000);
+      })
+      .catch((e) => {
+        // 不同源又不支持跨域的资源处理, 打开新页面交予用户操作
+        console.error(e);
+        link.target = "_blank";
+        link.href = src;
+        link.dispatchEvent(new MouseEvent("click"));
+      });
+  } else {
+    //  同源资源直接下载
+    link.href = src;
+    link.dispatchEvent(new MouseEvent("click"));
+  }
+}
+
+/** 使用 fileSaver 完成图片下载*/
+export function dlownloadImage(src: string) {
+  const fileName = src.substring(src.lastIndexOf("/") + 1);
+  FileSaver.saveAs(src, fileName);
 }

@@ -20,9 +20,9 @@ export function actionWrapper(ServiceName: any, commitName: string) {
     context: ActionContext<any, any>,
     payload: ActionPayload = {}
   ) => {
-    //第三部 写内部重复的逻辑
+    //第三步 写内部重复的逻辑
     const resp = await ServiceName[commitName](payload);
-    context.commit(commitName, { payload, ...resp });
+    context.commit(commitName, { ...payload, ...resp });
     return resp.data;
   };
 }
@@ -48,11 +48,12 @@ const templates: Module<TemplatesProps, GlobalDataProps> = {
   },
   actions: {
     fetchWorks: actionWrapper(WorkApi, "fetchWorks"), //  获取我的作品
-    async fetchTemplates(context, { searchParams = {}, loadMore = false }) {
-      const result = await WorkApi.fetchTemplates({ searchParams });
-      context.commit("fetchTemplates", { ...result, loadMore });
-      return result.data;
-    },
+    fetchTemplates: actionWrapper(WorkApi, "fetchTemplates"), //  获取模板列表
+    // async fetchTemplates(context, { searchParams = {}, loadMore = false }) {
+    //   const result = await WorkApi.fetchTemplates({ searchParams });
+    //   context.commit("fetchTemplates", { ...result, loadMore });
+    //   return result.data;
+    // },
     async fetchTemplate({ commit }, { id }) {
       const result = await ApiService.get(`api/templates/${id}`);
       commit("fetchTemplate", result);
