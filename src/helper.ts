@@ -4,7 +4,6 @@ import axios from "axios";
 import { RespUploadData } from "@/store/respTypes";
 import QRCode from "qrcode";
 import FileSaver from "file-saver";
-import { lastIndexOf } from "lodash-es";
 interface CheckCondition {
   format?: string[];
   size?: number; //  使用多少 M 为单位

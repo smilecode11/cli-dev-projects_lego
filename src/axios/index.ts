@@ -11,13 +11,28 @@ export type ICustomAxiosRequestConfig = AxiosRequestConfig & {
   opName?: string;
 };
 
-export const baseH5URL = "http://127.0.0.1:7002";
+let baseH5URL = "";
+let baseURL = "";
+
+if (process.env.NODE_ENV === "development" || process.env.VUE_APP_STAGINE) {
+  baseH5URL = "http://127.0.0.1:7002/";
+  baseURL = "http://127.0.0.1:7001/";
+} else {
+  baseH5URL = "http://120.26.167.109:7002/";
+  baseURL = "http://120.26.167.109:7001/";
+}
+
+export { baseH5URL, baseURL };
+
+console.log("_NODE ENV", process.env.NODE_ENV);
+console.log("_VUE_APP_FOO", process.env.VUE_APP_FOO);
+console.log("_VUE_APP_STAGINE", process.env.VUE_APP_STAGINE);
 
 //  导出 Request , 用来自定义传递配置来创建实例
 export class Request {
   instance: AxiosInstance;
   baseConfig: ICustomAxiosRequestConfig = {
-    baseURL: "http://127.0.0.1:7001/",
+    baseURL,
     timeout: 60000,
   };
 

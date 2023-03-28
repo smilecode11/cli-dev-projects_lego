@@ -6,7 +6,7 @@ import Antd from "ant-design-vue";
 import LegoBricks from "lego-bricks";
 const app = createApp(App);
 
-import "ant-design-vue/dist/antd.css";
+import "ant-design-vue/dist/antd.less";
 import "lego-bricks/dist/bundle.css";
 import "cropperjs/dist/cropper.css";
 

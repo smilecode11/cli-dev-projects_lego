@@ -1,26 +1,23 @@
-/* eslint-disable prettier/prettier */
+const isStaging = !!process.env.VUE_APP_STAGING //  预发环境 - 测试接口地址, 生产打包
+const isProduction = process.env.NODE_ENV === "production"  //  生产环境 - 生产地址, 生产打包
+
 const { defineConfig } = require("@vue/cli-service");
 module.exports = defineConfig({
-  transpileDependencies: true,
-  devServer: {
-    proxy: {
-      // '/api': {
-      //   target: 'http://182.92.168.192:8081',
-      //   pathRewrite: {},
-      //   headers: {
-      //     authorization: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjY2LCJ1c2VybmFtZSI6IjE4OTU4ODQ5NzUyIiwicGFzc3dvcmQiOiI0YjdjNzhiMzAxYjYxYTMzYmM5ZTI1MWMyYWVhMWU0MSIsInBob25lTnVtYmVyIjoiMTg5NTg4NDk3NTIiLCJuaWNrTmFtZSI6IuS5kOmrmDk3NTIiLCJnZW5kZXIiOjAsInBpY3R1cmUiOm51bGwsImNpdHkiOm51bGwsImxhdGVzdExvZ2luQXQiOiIyMDIyLTA2LTA4VDA5OjQyOjA5LjAwMFoiLCJpc0Zyb3plbiI6ZmFsc2UsImNyZWF0ZWRBdCI6IjIwMjItMDYtMDhUMDk6NDI6MDkuMDAwWiIsInVwZGF0ZWRBdCI6IjIwMjItMDYtMDhUMDk6NDI6MDkuMDAwWiIsImlhdCI6MTY1NDY4MTY4NiwiZXhwIjoxNjU0NzY4MDg2fQ.fUfYVoRSJqkp2IDtG2NJgN3YcObCPDe_4vEY1EEJ1uo'
-      //   }
-      // },
-      // '/api': {
-      //   target: 'https://jsonplaceholder.typicode.com',
-      //   pathRewrite: { '^/api2': '' },
-      //   origin: 'https://element-plus.gitee.io'
-      // },
-      '/api': {
-        target: 'http://127.0.0.1:7001',
-        pathRewrite: { '^/api': '' },
-        secure: true
-      }
-    }
-  }
+  // 生产环境使用 OSS 地址, 测试环境使用绝对路径
+  publicPath: (isProduction && !isStaging) ? "https://oss.smiling-code.com/editor" : "/",  //  默认值是 /, 部署在根目录上
+  // 修改主题, 设置 ant-design-vue 主题样式
+  css: {
+    loaderOptions: {
+      less: {
+        lessOptions: {
+          modifyVars: {
+            'primary-color': '#1DA57A',
+            'link-color': '#1DA57A',
+            'border-radius-base': '2px',
+          },
+          javascriptEnabled: true,
+        },
+      },
+    },
+  },
 });
