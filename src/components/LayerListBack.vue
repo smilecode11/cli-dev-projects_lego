@@ -56,7 +56,6 @@ import {
 } from "@ant-design/icons-vue";
 import InlineEdit from "@/components/InlineEdit.vue";
 import { ComponentProps } from "@/store/modules/editor";
-import { getParentElement } from "@/helper";
 import { arrayMoveMutable } from "array-move";
 
 export default defineComponent({

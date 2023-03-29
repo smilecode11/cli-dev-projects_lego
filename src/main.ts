@@ -2,7 +2,8 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-import Antd from "ant-design-vue";
+// import Antd from "ant-design-vue";
+import Antd from "./configAntD";
 import LegoBricks from "lego-bricks";
 const app = createApp(App);
 
