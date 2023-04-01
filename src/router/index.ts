@@ -1,12 +1,13 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import IndexView from "../layout/index.vue";
 import HomeView from "../views/home/index.vue";
-import LoginView from "../views/login/index.vue";
-import EditorView from "../views/editor/index.vue";
-import TemplateView from "../views/template/index.vue";
-import TemplateDetailView from "../views/template/detail/index.vue";
 import store from "@/store";
 import { message } from "ant-design-vue";
+
+const LoginView = () => import("../views/login/index.vue");
+const EditorView = () => import("../views/editor/index.vue");
+const TemplateView = () => import("../views/template/index.vue");
+const TemplateDetailView = () => import("../views/template/detail/index.vue");
 
 const routes: Array<RouteRecordRaw> = [
   {
